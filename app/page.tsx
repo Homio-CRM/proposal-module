@@ -1,11 +1,5 @@
-import { Table } from "@/components/ui/table";
-
-
-
 export default function Home() {
   return (
-   <>
-      <Table></Table>
-   </>
-  );
+    <div className="h-screen bg-red-300"></div>
+  )
 }
