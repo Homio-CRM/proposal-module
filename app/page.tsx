@@ -1,11 +1,11 @@
-import { Table } from "lucide-react";
+import { Table } from "@/components/ui/table";
 
 
 
 export default function Home() {
   return (
    <>
-   <Table></Table>
+      <Table></Table>
    </>
   );
 }
