@@ -2,11 +2,12 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-
+import { Search } from 'lucide-react'
 import { z } from 'zod'
 import { FormDataSchema } from '@/types/formSchema'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm, SubmitHandler } from 'react-hook-form'
+
 
 type Inputs = z.infer<typeof FormDataSchema>
 
@@ -70,7 +71,8 @@ export default function Form() {
   }
 
   return (
-    <section className='absolute inset-0 flex flex-col justify-between p-24'>
+    <>
+    <section className='flex flex-col justify-between p-24'>
       {/* steps */}
       <nav aria-label='Progress'>
         <ol role='list' className='space-y-4 md:flex md:space-x-8 md:space-y-0'>
@@ -126,18 +128,18 @@ export default function Form() {
                   htmlFor='firstName'
                   className='block text-sm font-medium leading-6 text-gray-900'
                 >
-                  First name
+                  Id da Oportunidade
                 </label>
-                <div className='mt-2'>
+                <div className='mt-2  bg-gray-100 rounded-md border-0  shadow-sm ring-1 ring-inset flex  text-gray-900 '>
                   <input
                     type='text'
                     id='firstName'
                     {...register('firstName')}
                     autoComplete='given-name'
-                    className='block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-sky-600 sm:text-sm sm:leading-6'
+                    className='block w-full ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-sky-600 sm:text-sm sm:leading-6'
                   />
                   {errors.firstName?.message && (
-                    <p className='mt-2 text-sm text-red-400'>
+                    <p className='mt-2 text-sm text-red-400 absolute bottom-3'>
                       {errors.firstName.message}
                     </p>
                   )}
@@ -388,5 +390,6 @@ export default function Form() {
         </div>
       </div>
     </section>
+    </>
   )
 }

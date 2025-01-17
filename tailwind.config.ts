@@ -19,7 +19,7 @@ export default {
   		colors: {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
-  			'gray': {
+  			gray: {
   				'0': '#F7F9FC',
   				'50': '#E9EDF5',
   				'100': '#D5DBE5',
@@ -32,23 +32,23 @@ export default {
   				'800': '#333B4A',
   				'900': '#171C26'
   			},
-  			'indigo': {
+  			indigo: {
   				'0': '#EDEDFC',
   				'50': '#DFDEFC',
-  				'100': '#D0CFFC',
-  				'200': '#B9B6FA',
-  				'300': '#9E9BF5',
-  				'400': '#807CEA',
-  				'500': '#5E5ADB',
-  				'600': '#4945C4',
-  				'700': '#3734A3',
-  				'800': '#3734A3',
-  				'900': '#151357'
+  				'100': '#AAC2FF',
+  				'200': '#88AFFF',
+  				'300': '#448DF1',
+  				'400': '#227DE0',
+  				'500': '#036DCB',
+  				'600': '#0039B5',
+  				'700': '#000E9E',
+  				'800': '#0A0085',
+  				'900': '#1F006D'
   			},
-  			'blue': {
+  			blue: {
   				'300': '#036DCB'
   			},
-  			'purple': {
+  			purple: {
   				'300': '#8B3BC4'
   			},
   			card: {
