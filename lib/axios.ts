@@ -6,15 +6,19 @@ const homio = axios.create({
   headers: {
     "Content-Type": "application/json", 
     Accept: "application/json",
-  },
+  }
 });
 
-homio.interceptors.response.use(
-    (response) => response,
-    (error) => {
-      console.error("Erro na resposta Axios:", error.response || error.message);
-      return Promise.reject(error);
-    }
-  );
+// homio.interceptors.response.use(
+//     (response) => response,
+//     (error) => {
+//       console.error("Erro na resposta Axios:", {
+//         status: error.response?.status,
+//         data: error.response?.data,
+//         message: error.message,
+//       });
+//       return Promise.reject(error);
+//     }
+//   );
   
 export default homio;
