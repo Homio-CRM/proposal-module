@@ -13,7 +13,6 @@ let tokenExpiration: number | null = null;
 
 export async function getOrCreateToken(): Promise<string> {
   if (!tokenData || !tokenExpiration || Date.now() >= tokenExpiration) {
-    console.log("Token expirado ou inexistente, obtendo novo token...");
     try {
       const body = {
         companyId: process.env.COMPANY_ID,
@@ -43,4 +42,3 @@ export async function getOrCreateToken(): Promise<string> {
   }
   return tokenData.access_token;
 }
-
