@@ -1,4 +1,5 @@
 // lib/auth.ts
+import { redirect } from "next/dist/server/api-utils";
 import homio from "./axios";
 
 interface TokenResponse {
@@ -10,23 +11,21 @@ interface TokenResponse {
 export async function getAccessToken(): Promise<TokenResponse> {
   try {
     const body = {
-        clientId: process.env.CLIENT_ID,
-        client_secret: process.env.CLIENT_SECRET,
-        grant_type: 'authorization_code',
-        code:process.env.AUTHORIZATION_CODE,
-        user_type:'Company'
-    }
-    const response = await homio.post<TokenResponse>(
-      "/oauth/token",
-      body,
-      {
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/x-www-form-urlencoded",
+        companyId: process.env.COMPANY_ID,
+        locationId: process.env.LOCATION_ID
+      }
+      const response = await homio.post<TokenResponse>(
+        "/oauth/locationToken",
+        body,
+        {
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/x-www-form-urlencoded",
+            Version: "2021-07-28",
+            Authorization: "bearer " + process.env.AUTHORIZATION_TOKEN
         },
       }
     );
-
     return response.data;
   } catch (error) {
     console.error("Erro ao obter o token de autenticação:", error);
