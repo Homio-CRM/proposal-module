@@ -1,13 +1,13 @@
 import React from 'react'
 import Form from '@/components/Form'
-import { getAccessToken } from '@/lib/auth'
+import { getOrCreateToken } from '@/lib/auth'
 
 
 
 
 
 const proposals = async () => {
-  const token = await getAccessToken()
+  const token = await getOrCreateToken()
   console.log(token)
   return (
     <>
