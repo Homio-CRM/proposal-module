@@ -8,12 +8,17 @@ interface TokenResponse {
   refresh_token?: string;
 }
 
-export async function getAccessToken(): Promise<TokenResponse> {
-  try {
-    const body = {
+let tokenData: TokenResponse | null = null;
+let tokenExpiration: number | null = null;
+
+export async function getOrCreateToken(): Promise<string> {
+  if (!tokenData || !tokenExpiration || Date.now() >= tokenExpiration) {
+    try {
+      const body = {
         companyId: process.env.COMPANY_ID,
-        locationId: process.env.LOCATION_ID
-      }
+        locationId: process.env.LOCATION_ID,
+      };
+
       const response = await homio.post<TokenResponse>(
         "/oauth/locationToken",
         body,
@@ -22,13 +27,18 @@ export async function getAccessToken(): Promise<TokenResponse> {
             Accept: "application/json",
             "Content-Type": "application/x-www-form-urlencoded",
             Version: "2021-07-28",
-            Authorization: "bearer " + process.env.AUTHORIZATION_TOKEN
-        },
-      }
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Erro ao obter o token de autenticação:", error);
-    throw new Error("Falha ao obter o token de autenticação.");
+            Authorization: "bearer " + process.env.AUTHORIZATION_TOKEN,
+          },
+        }
+      );
+
+      tokenData = response.data;
+      tokenExpiration = Date.now() + tokenData.expires_in * 1000;
+      return tokenData.access_token;
+    } catch (error) {
+      console.error("Erro ao obter o token de autenticação:", error);
+      throw new Error("Falha ao obter o token de autenticação.");
+    }
   }
+  return tokenData.access_token;
 }
