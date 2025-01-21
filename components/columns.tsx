@@ -13,11 +13,11 @@ export const columns: ColumnDef<Apartment>[] = [
     header: "Situação",
   },
   {
-    accessorKey: "enterprise",
-    header: "Empreendimento",
-  },
-  {
     accessorKey: "price",
     header: "Preço",
+  },
+  {
+    accessorKey: "enterprise",
+    header: "Empreendimento",
   },
 ]
