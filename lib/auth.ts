@@ -1,12 +1,11 @@
-// lib/auth.ts
-import { redirect } from "next/dist/server/api-utils";
+
 import homio from "./axios";
 
-// interface TokenResponse {
-//   access_token: string;
-//   expires_in: number;
-//   refresh_token?: string;
-// }
+interface TokenResponse {
+  access_token: string;
+  expires_in: number;
+  refresh_token?: string;
+}
 
 let tokenData: TokenResponse | null = null;
 let tokenExpiration: number | null = null;

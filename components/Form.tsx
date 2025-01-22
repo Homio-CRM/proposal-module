@@ -9,6 +9,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm, SubmitHandler } from 'react-hook-form'
 
 
+
 type Inputs = z.infer<typeof FormDataSchema>
 
 const steps = [
@@ -73,7 +74,7 @@ export default function Form() {
 
   return (
     <>
-      <section className='flex flex-col justify-between mt-6'>
+      <section className='flex flex-col justify-between mt-6 '>
         {/* steps */}
         <nav aria-label='Progress'>
           <ol role='list' className='space-y-4 md:flex md:space-x-8 md:space-y-0'>
@@ -110,15 +111,15 @@ export default function Form() {
         </nav>
 
         {/* Form */}
-        <form className='mt-12 py-12' onSubmit={handleSubmit(processForm)}>
+        <form className='mt-12 py-12 max-w-5xl' onSubmit={handleSubmit(processForm)}>
           {currentStep === 0 && (
             <motion.div
               initial={{ x: delta >= 0 ? '50%' : '-50%', opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               transition={{ duration: 0.3, ease: 'easeInOut' }}
             >
-              <div className='mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6'>
-                <div className='sm:col-span-3'>
+              <div className='mt-10 grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-8'>
+                <div className='sm:col-span-6'>
                   <label
                     htmlFor='opportunityId'
                     className='block text-sm font-bold leading-6 text-gray-900'
@@ -132,13 +133,13 @@ export default function Form() {
                       id='opportunityId'
                       {...register('opportunityId')}
                       autoComplete='given-name'
-                      className='block w-full bg-transparent p-1.5 pl-3 placeholder:gray-200 placeholder:font-medium focus:bg-white !outline-none sm:text-sm sm:leading-6'
+                      className='block w-full bg-transparent p-1.5 pl-3 placeholder:gray-200 font-medium focus:bg-white !outline-none sm:text-sm sm:leading-6'
                     />
                     <button className='p-1.5'>
                       <Search className='text-blue-300 p-1' />
                     </button>
                     {errors.opportunityId?.message && (
-                      <p className='text-sm text-red-400 fixed mt-11'>
+                      <p className='text-sm font-medium text-red-400 fixed mt-11'>
                         {errors.opportunityId.message}
                       </p>
                     )}
@@ -158,19 +159,19 @@ export default function Form() {
                       id='proposalDate'
                       {...register('proposalDate')}
                       autoComplete='family-name'
-                      className='px-3  rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
                        focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
-                       placeholder:text-gray-200 placeholder:font-medium sm:text-sm sm:leading-6'
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
                     />
                     {errors.proposalDate?.message && (
-                      <p className='mt-2 text-sm text-red-400'>
+                      <p className='mt-2  font-medium text-sm text-red-400'>
                         {errors.proposalDate.message}
                       </p>
                     )}
                   </div>
                 </div>
 
-                <div className='sm:col-span-2'>
+                <div className='sm:col-span-4'>
                   <label
                     htmlFor='name'
                     className='block text-sm font-bold leading-6 text-gray-900'
@@ -184,16 +185,16 @@ export default function Form() {
                       {...register('name')}
                       className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
                        focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
-                       placeholder:text-gray-200 placeholder:font-medium sm:text-sm sm:leading-6'
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
                     />
                     {errors.name?.message && (
-                      <p className='mt-2 text-sm text-red-400'>
+                      <p className='mt-2 text-sm font-medium text-red-400'>
                         {errors.name.message}
                       </p>
                     )}
                   </div>
                 </div>
-                <div className='sm:col-span-1'>
+                <div className='sm:col-span-2'>
                   <label
                     htmlFor='cpf'
                     className='block text-sm font-bold leading-6 text-gray-900'
@@ -207,16 +208,16 @@ export default function Form() {
                       {...register('cpf')}
                       className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
                        focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
-                       placeholder:text-gray-200 placeholder:font-medium sm:text-sm sm:leading-6'
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
                     />
                     {errors.cpf?.message && (
-                      <p className='mt-2 text-sm text-red-400'>
+                      <p className='mt-2 text-sm font-medium text-red-400'>
                         {errors.cpf.message}
                       </p>
                     )}
                   </div>
                 </div>
-                <div className='sm:col-span-1'>
+                <div className='sm:col-span-2'>
                   <label
                     htmlFor='rg'
                     className='block text-sm font-bold leading-6 text-gray-900'
@@ -230,7 +231,7 @@ export default function Form() {
                       {...register('rg')}
                       className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
                        focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
-                       placeholder:text-gray-200 placeholder:font-medium sm:text-sm sm:leading-6'
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
                     />
                     {errors.rg?.message && (
                       <p className='mt-2 text-sm text-red-400'>
@@ -238,6 +239,254 @@ export default function Form() {
                       </p>
                     )}
                   </div>
+                </div>
+                <div className='sm:col-span-4'>
+                  <label
+                    htmlFor='nationality'
+                    className='block text-sm font-bold leading-6 text-gray-900'
+                  >
+                    Nacionalidade
+                  </label>
+                  <div className='block'>
+                    <input
+                      id='nationality'
+                      type='text'
+                      {...register('nationality')}
+                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    />
+                    {errors.nationality?.message && (
+                      <p className='mt-2 text-sm text-red-400'>
+                        {errors.nationality.message}
+                      </p>
+                    )}
+                  </div>
+
+                </div>
+                <div className='sm:col-span-2'>
+                  <label
+                    htmlFor='maritalStatus'
+                    className='block text-sm font-bold leading-6 text-gray-900'
+                  >
+                    Estado Civil
+                  </label>
+                  <div className='block'>
+                    <input
+                      id='maritalStatus'
+                      type='text'
+                      {...register('maritalStatus')}
+                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    />
+                    {errors.maritalStatus?.message && (
+                      <p className='mt-2 text-sm font-medium text-red-400'>
+                        {errors.maritalStatus.message}
+                      </p>
+                    )}
+                  </div>
+
+                </div>
+                <div className='sm:col-span-2'>
+                  <label
+                    htmlFor='birthDate'
+                    className='block text-sm font-bold leading-6 text-gray-900'
+                  >
+                    Data de Nascimento
+                  </label>
+                  <div className='block'>
+                    <input
+                      id='birthDate'
+                      type='date'
+                      {...register('birthDate')}
+                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    />
+                    {errors.birthDate?.message && (
+                      <p className='mt-2 text-sm font-medium text-red-400'>
+                        {errors.birthDate.message}
+                      </p>
+                    )}
+                  </div>
+
+                </div>
+                <div className='sm:col-span-4'>
+                  <label
+                    htmlFor='email'
+                    className='block text-sm font-bold leading-6 text-gray-900'
+                  >
+                    Email
+                  </label>
+                  <div className='block'>
+                    <input
+                      id='email'
+                      type='text'
+                      {...register('email')}
+                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    />
+                    {errors.birthDate?.message && (
+                      <p className='mt-2 text-sm font-medium text-red-400'>
+                        {errors.birthDate.message}
+                      </p>
+                    )}
+                  </div>
+
+                </div>
+
+                <div className='sm:col-span-2'>
+                  <label
+                    htmlFor='phone'
+                    className='block text-sm font-bold leading-6 text-gray-900'
+                  >
+                    Telefone
+                  </label>
+                  <div className='block'>
+                    <input
+                      id='phone'
+                      type='text'
+                      {...register('phone')}
+                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    />
+                    {errors.phone?.message && (
+                      <p className='mt-2 text-sm font-medium text-red-400'>
+                        {errors.phone.message}
+                      </p>
+                    )}
+                  </div>
+
+                </div>
+
+                <div className='sm:col-span-4'>
+                  <label
+                    htmlFor='address'
+                    className='block text-sm font-bold leading-6 text-gray-900'
+                  >
+                    Endereço
+                  </label>
+                  <div className='block'>
+                    <input
+                      id='address'
+                      type='text'
+                      {...register('address')}
+                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    />
+                    {errors.address?.message && (
+                      <p className='mt-2 text-sm font-medium text-red-400'>
+                        {errors.address.message}
+                      </p>
+                    )}
+                  </div>
+
+                </div>
+
+                <div className='sm:col-span-2'>
+                  <label
+                    htmlFor='zipCode'
+                    className='block text-sm font-bold leading-6 text-gray-900'
+                  >
+                    CEP
+                  </label>
+                  <div className='block'>
+                    <input
+                      id='zipCode'
+                      type='text'
+                      {...register('zipCode')}
+                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    />
+                    {errors.zipCode?.message && (
+                      <p className='mt-2 text-sm font-medium text-red-400'>
+                        {errors.zipCode.message}
+                      </p>
+                    )}
+                  </div>
+
+                </div>
+                <div className='sm:col-span-1'></div>
+                <div className='sm:col-span-2'>
+                  <label
+                    htmlFor='city'
+                    className='block text-sm font-bold leading-6 text-gray-900'
+                  >
+                    Cidade
+                  </label>
+                  <div className='block'>
+                    <input
+                      id='city'
+                      type='text'
+                      {...register('city')}
+                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    />
+                    {errors.city?.message && (
+                      <p className='mt-2 text-sm font-medium text-red-400'>
+                        {errors.city.message}
+                      </p>
+                    )}
+                  </div>
+
+                </div>
+
+
+                <div className='sm:col-span-2'>
+                  <label
+                    htmlFor='neighborhood'
+                    className='block text-sm font-bold leading-6 text-gray-900'
+                  >
+                    Bairro
+                  </label>
+                  <div className='block'>
+                    <input
+                      id='neighborhood'
+                      type='text'
+                      {...register('neighborhood')}
+                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    />
+                    {errors.neighborhood?.message && (
+                      <p className='mt-2 text-sm font-medium text-red-400'>
+                        {errors.neighborhood.message}
+                      </p>
+                    )}
+                  </div>
+
+                </div>
+
+
+                <div className='sm:col-span-1'>
+                  <label
+                    htmlFor='state'
+                    className='block text-sm font-bold leading-6 text-gray-900'
+                  >
+                    Estado
+                  </label>
+                  <div className='block'>
+                    <input
+                      id='state'
+                      type='text'
+                      {...register('state')}
+                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    />
+                    {errors.state?.message && (
+                      <p className='mt-2 text-sm font-medium text-red-400'>
+                        {errors.state.message}
+                      </p>
+                    )}
+                  </div>
+
                 </div>
               </div>
             </motion.div>
