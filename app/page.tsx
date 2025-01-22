@@ -2,6 +2,9 @@ import React from 'react'
 import { Apartment } from '@/types/apartmentType'
 import { columns } from "@/components/columns"
 import { DataTable } from "@/components/data-table"
+import { cookies } from 'next/headers'
+import { getOrCreateToken } from '@/lib/auth'
+
 
   export const data: Apartment[] = [
     {
@@ -47,5 +50,5 @@ export default function Home() {
     <div >
     <DataTable columns={columns} data={data} />
   </div>
-  )
+)
 }

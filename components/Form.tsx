@@ -9,18 +9,21 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm, SubmitHandler } from 'react-hook-form'
 
 
+
 type Inputs = z.infer<typeof FormDataSchema>
 
 const steps = [
   {
     id: 'Step 1',
     name: 'Personal Information',
-    fields: ['firstName', 'lastName', 'email']
+    fields: ['oppportunityId', 'proposalDate', 'name', 'cpf', 'rg'],
+    subTitle: 'Preencha o ID da oportunidade  para criar a sua proposta.'
   },
   {
     id: 'Step 2',
     name: 'Address',
-    fields: ['country', 'state', 'city', 'street', 'zip']
+    fields: ['country', 'state', 'city', 'street', 'zip'],
+    subTitle: 'Confira os dados do cônjuge'
   },
   { id: 'Step 3', name: 'Complete' }
 ]
@@ -33,7 +36,6 @@ export default function Form() {
   const {
     register,
     handleSubmit,
-    watch,
     reset,
     trigger,
     formState: { errors }
@@ -72,324 +74,518 @@ export default function Form() {
 
   return (
     <>
-    <section className='flex flex-col justify-between p-24'>
-      {/* steps */}
-      <nav aria-label='Progress'>
-        <ol role='list' className='space-y-4 md:flex md:space-x-8 md:space-y-0'>
-          {steps.map((step, index) => (
-            <li key={step.name} className='md:flex-1'>
-              {currentStep > index ? (
-                <div className='group flex w-full flex-col border-l-4 border-sky-600 py-2 pl-4 transition-colors md:border-l-0 md:border-t-4 md:pb-0 md:pl-0 md:pt-4'>
-                  <span className='text-sm font-medium text-sky-600 transition-colors '>
-                    {step.id}
-                  </span>
-                  <span className='text-sm font-medium'>{step.name}</span>
-                </div>
-              ) : currentStep === index ? (
-                <div
-                  className='flex w-full flex-col border-l-4 border-sky-600 py-2 pl-4 md:border-l-0 md:border-t-4 md:pb-0 md:pl-0 md:pt-4'
-                  aria-current='step'
-                >
-                  <span className='text-sm font-medium text-sky-600'>
-                    {step.id}
-                  </span>
-                  <span className='text-sm font-medium'>{step.name}</span>
-                </div>
-              ) : (
-                <div className='group flex w-full flex-col border-l-4 border-gray-200 py-2 pl-4 transition-colors md:border-l-0 md:border-t-4 md:pb-0 md:pl-0 md:pt-4'>
-                  <span className='text-sm font-medium text-gray-500 transition-colors'>
-                    {step.id}
-                  </span>
-                  <span className='text-sm font-medium'>{step.name}</span>
-                </div>
-              )}
-            </li>
-          ))}
-        </ol>
-      </nav>
-
-      {/* Form */}
-      <form className='mt-12 py-12' onSubmit={handleSubmit(processForm)}>
-        {currentStep === 0 && (
-          <motion.div
-            initial={{ x: delta >= 0 ? '50%' : '-50%', opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ duration: 0.3, ease: 'easeInOut' }}
-          >
-            <h2 className='text-base font-semibold leading-7 text-gray-900'>
-              Personal Information
-            </h2>
-            <p className='mt-1 text-sm leading-6 text-gray-600'>
-              Provide your personal details.
-            </p>
-            <div className='mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6'>
-              <div className='sm:col-span-3'>
-                <label
-                  htmlFor='firstName'
-                  className='block text-sm font-medium leading-6 text-gray-900'
-                >
-                  Id da Oportunidade
-                </label>
-                <div className='mt-2  bg-gray-100 rounded-md border-0  shadow-sm ring-1 ring-inset flex  text-gray-900 '>
-                  <input
-                    type='text'
-                    id='firstName'
-                    {...register('firstName')}
-                    autoComplete='given-name'
-                    className='block w-full ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-sky-600 sm:text-sm sm:leading-6'
-                  />
-                  {errors.firstName?.message && (
-                    <p className='mt-2 text-sm text-red-400 absolute bottom-3'>
-                      {errors.firstName.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div className='sm:col-span-3'>
-                <label
-                  htmlFor='lastName'
-                  className='block text-sm font-medium leading-6 text-gray-900'
-                >
-                  Last name
-                </label>
-                <div className='mt-2'>
-                  <input
-                    type='text'
-                    id='lastName'
-                    {...register('lastName')}
-                    autoComplete='family-name'
-                    className='block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-sky-600 sm:text-sm sm:leading-6'
-                  />
-                  {errors.lastName?.message && (
-                    <p className='mt-2 text-sm text-red-400'>
-                      {errors.lastName.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div className='sm:col-span-4'>
-                <label
-                  htmlFor='email'
-                  className='block text-sm font-medium leading-6 text-gray-900'
-                >
-                  Email address
-                </label>
-                <div className='mt-2'>
-                  <input
-                    id='email'
-                    type='email'
-                    {...register('email')}
-                    autoComplete='email'
-                    className='block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-sky-600 sm:text-sm sm:leading-6'
-                  />
-                  {errors.email?.message && (
-                    <p className='mt-2 text-sm text-red-400'>
-                      {errors.email.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-
-        {currentStep === 1 && (
-          <motion.div
-            initial={{ x: delta >= 0 ? '50%' : '-50%', opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ duration: 0.3, ease: 'easeInOut' }}
-          >
-            <h2 className='text-base font-semibold leading-7 text-gray-900'>
-              Address
-            </h2>
-            <p className='mt-1 text-sm leading-6 text-gray-600'>
-              Address where you can receive mail.
-            </p>
-
-            <div className='mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6'>
-              <div className='sm:col-span-3'>
-                <label
-                  htmlFor='country'
-                  className='block text-sm font-medium leading-6 text-gray-900'
-                >
-                  Country
-                </label>
-                <div className='mt-2'>
-                  <select
-                    id='country'
-                    {...register('country')}
-                    autoComplete='country-name'
-                    className='block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-sky-600 sm:max-w-xs sm:text-sm sm:leading-6'
+      <section className='flex flex-col justify-between mt-6 '>
+        {/* steps */}
+        <nav aria-label='Progress'>
+          <ol role='list' className='space-y-4 md:flex md:space-x-8 md:space-y-0'>
+            {steps.map((step, index) => (
+              <li key={step.name} className='md:flex-1'>
+                {currentStep > index ? (
+                  <div className='group flex w-full flex-col border-l-4 border-sky-600 py-2 pl-4 transition-colors md:border-l-0 md:border-t-4 md:pb-0 md:pl-0 md:pt-4'>
+                    <span className='text-sm font-medium text-sky-600 transition-colors '>
+                      {step.id}
+                    </span>
+                    <span className='text-sm font-medium'>{step.name}</span>
+                  </div>
+                ) : currentStep === index ? (
+                  <div
+                    className='flex w-full flex-col border-l-4 border-sky-600 py-2 pl-4 md:border-l-0 md:border-t-4 md:pb-0 md:pl-0 md:pt-4'
+                    aria-current='step'
                   >
-                    <option>United States</option>
-                    <option>Canada</option>
-                    <option>Mexico</option>
-                  </select>
-                  {errors.country?.message && (
-                    <p className='mt-2 text-sm text-red-400'>
-                      {errors.country.message}
-                    </p>
-                  )}
-                </div>
-              </div>
+                    <span className='text-sm font-medium text-sky-600'>
+                      {step.id}
+                    </span>
+                    <span className='text-sm font-medium'>{step.name}</span>
+                  </div>
+                ) : (
+                  <div className='group flex w-full flex-col border-l-4 border-gray-200 py-2 pl-4 transition-colors md:border-l-0 md:border-t-4 md:pb-0 md:pl-0 md:pt-4'>
+                    <span className='text-sm font-medium text-gray-500 transition-colors'>
+                      {step.id}
+                    </span>
+                    <span className='text-sm font-medium'>{step.name}</span>
+                  </div>
+                )}
+              </li>
+            ))}
+          </ol>
+        </nav>
 
-              <div className='col-span-full'>
-                <label
-                  htmlFor='street'
-                  className='block text-sm font-medium leading-6 text-gray-900'
-                >
-                  Street address
-                </label>
-                <div className='mt-2'>
-                  <input
-                    type='text'
-                    id='street'
-                    {...register('street')}
-                    autoComplete='street-address'
-                    className='block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-sky-600 sm:text-sm sm:leading-6'
-                  />
-                  {errors.street?.message && (
-                    <p className='mt-2 text-sm text-red-400'>
-                      {errors.street.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div className='sm:col-span-2 sm:col-start-1'>
-                <label
-                  htmlFor='city'
-                  className='block text-sm font-medium leading-6 text-gray-900'
-                >
-                  City
-                </label>
-                <div className='mt-2'>
-                  <input
-                    type='text'
-                    id='city'
-                    {...register('city')}
-                    autoComplete='address-level2'
-                    className='block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-sky-600 sm:text-sm sm:leading-6'
-                  />
-                  {errors.city?.message && (
-                    <p className='mt-2 text-sm text-red-400'>
-                      {errors.city.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div className='sm:col-span-2'>
-                <label
-                  htmlFor='state'
-                  className='block text-sm font-medium leading-6 text-gray-900'
-                >
-                  State / Province
-                </label>
-                <div className='mt-2'>
-                  <input
-                    type='text'
-                    id='state'
-                    {...register('state')}
-                    autoComplete='address-level1'
-                    className='block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-sky-600 sm:text-sm sm:leading-6'
-                  />
-                  {errors.state?.message && (
-                    <p className='mt-2 text-sm text-red-400'>
-                      {errors.state.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div className='sm:col-span-2'>
-                <label
-                  htmlFor='zip'
-                  className='block text-sm font-medium leading-6 text-gray-900'
-                >
-                  ZIP / Postal code
-                </label>
-                <div className='mt-2'>
-                  <input
-                    type='text'
-                    id='zip'
-                    {...register('zip')}
-                    autoComplete='postal-code'
-                    className='block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-sky-600 sm:text-sm sm:leading-6'
-                  />
-                  {errors.zip?.message && (
-                    <p className='mt-2 text-sm text-red-400'>
-                      {errors.zip.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-
-        {currentStep === 2 && (
-          <>
-            <h2 className='text-base font-semibold leading-7 text-gray-900'>
-              Complete
-            </h2>
-            <p className='mt-1 text-sm leading-6 text-gray-600'>
-              Thank you for your submission.
-            </p>
-          </>
-        )}
-      </form>
-
-      {/* Navigation */}
-      <div className='mt-8 pt-5'>
-        <div className='flex justify-between'>
-          <button
-            type='button'
-            onClick={prev}
-            disabled={currentStep === 0}
-            className='rounded bg-white px-2 py-1 text-sm font-semibold text-sky-900 shadow-sm ring-1 ring-inset ring-sky-300 hover:bg-sky-50 disabled:cursor-not-allowed disabled:opacity-50'
-          >
-            <svg
-              xmlns='http://www.w3.org/2000/svg'
-              fill='none'
-              viewBox='0 0 24 24'
-              strokeWidth='1.5'
-              stroke='currentColor'
-              className='h-6 w-6'
+        {/* Form */}
+        <form className='mt-12 py-12 max-w-5xl' onSubmit={handleSubmit(processForm)}>
+          {currentStep === 0 && (
+            <motion.div
+              initial={{ x: delta >= 0 ? '50%' : '-50%', opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
             >
-              <path
-                strokeLinecap='round'
-                strokeLinejoin='round'
-                d='M15.75 19.5L8.25 12l7.5-7.5'
-              />
-            </svg>
-          </button>
-          <button
-            type='button'
-            onClick={next}
-            disabled={currentStep === steps.length - 1}
-            className='rounded bg-white px-2 py-1 text-sm font-semibold text-sky-900 shadow-sm ring-1 ring-inset ring-sky-300 hover:bg-sky-50 disabled:cursor-not-allowed disabled:opacity-50'
-          >
-            <svg
-              xmlns='http://www.w3.org/2000/svg'
-              fill='none'
-              viewBox='0 0 24 24'
-              strokeWidth='1.5'
-              stroke='currentColor'
-              className='h-6 w-6'
+              <div className='mt-10 grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-8'>
+                <div className='sm:col-span-6'>
+                  <label
+                    htmlFor='opportunityId'
+                    className='block text-sm font-bold leading-6 text-gray-900'
+                  >
+                    Id da Oportunidade
+                  </label>
+                  <div className='mt-1 border-[1px] border-gray-100 hover:bg-white p-0  bg-gray-0 rounded-md shadow-sm  flex text-gray-900'>
+                    <input
+                      placeholder='digite aqui...'
+                      type='text'
+                      id='opportunityId'
+                      {...register('opportunityId')}
+                      autoComplete='given-name'
+                      className='block w-full bg-transparent p-1.5 pl-3 placeholder:gray-200 font-medium focus:bg-white !outline-none sm:text-sm sm:leading-6'
+                    />
+                    <button className='p-1.5'>
+                      <Search className='text-blue-300 p-1' />
+                    </button>
+                    {errors.opportunityId?.message && (
+                      <p className='text-sm font-medium text-red-400 fixed mt-11'>
+                        {errors.opportunityId.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className='sm:col-span-2'>
+                  <label
+                    htmlFor='lastName'
+                    className='block text-sm leading-6 font-bold text-gray-900'
+                  >
+                    Data da Proposta
+                  </label>
+                  <div className='mt-1'>
+                    <input
+                      type='date'
+                      id='proposalDate'
+                      {...register('proposalDate')}
+                      autoComplete='family-name'
+                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    />
+                    {errors.proposalDate?.message && (
+                      <p className='mt-2  font-medium text-sm text-red-400'>
+                        {errors.proposalDate.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className='sm:col-span-4'>
+                  <label
+                    htmlFor='name'
+                    className='block text-sm font-bold leading-6 text-gray-900'
+                  >
+                    Nome
+                  </label>
+                  <div className='mt-2'>
+                    <input
+                      id='name'
+                      type='text'
+                      {...register('name')}
+                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    />
+                    {errors.name?.message && (
+                      <p className='mt-2 text-sm font-medium text-red-400'>
+                        {errors.name.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <div className='sm:col-span-2'>
+                  <label
+                    htmlFor='cpf'
+                    className='block text-sm font-bold leading-6 text-gray-900'
+                  >
+                    CPF
+                  </label>
+                  <div className='mt-2'>
+                    <input
+                      id='cpf'
+                      type='text'
+                      {...register('cpf')}
+                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    />
+                    {errors.cpf?.message && (
+                      <p className='mt-2 text-sm font-medium text-red-400'>
+                        {errors.cpf.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <div className='sm:col-span-2'>
+                  <label
+                    htmlFor='rg'
+                    className='block text-sm font-bold leading-6 text-gray-900'
+                  >
+                    RG
+                  </label>
+                  <div className='mt-2'>
+                    <input
+                      id='rg'
+                      type='text'
+                      {...register('rg')}
+                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    />
+                    {errors.rg?.message && (
+                      <p className='mt-2 text-sm text-red-400'>
+                        {errors.rg.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <div className='sm:col-span-4'>
+                  <label
+                    htmlFor='nationality'
+                    className='block text-sm font-bold leading-6 text-gray-900'
+                  >
+                    Nacionalidade
+                  </label>
+                  <div className='block'>
+                    <input
+                      id='nationality'
+                      type='text'
+                      {...register('nationality')}
+                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    />
+                    {errors.nationality?.message && (
+                      <p className='mt-2 text-sm text-red-400'>
+                        {errors.nationality.message}
+                      </p>
+                    )}
+                  </div>
+
+                </div>
+                <div className='sm:col-span-2'>
+                  <label
+                    htmlFor='maritalStatus'
+                    className='block text-sm font-bold leading-6 text-gray-900'
+                  >
+                    Estado Civil
+                  </label>
+                  <div className='block'>
+                    <input
+                      id='maritalStatus'
+                      type='text'
+                      {...register('maritalStatus')}
+                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    />
+                    {errors.maritalStatus?.message && (
+                      <p className='mt-2 text-sm font-medium text-red-400'>
+                        {errors.maritalStatus.message}
+                      </p>
+                    )}
+                  </div>
+
+                </div>
+                <div className='sm:col-span-2'>
+                  <label
+                    htmlFor='birthDate'
+                    className='block text-sm font-bold leading-6 text-gray-900'
+                  >
+                    Data de Nascimento
+                  </label>
+                  <div className='block'>
+                    <input
+                      id='birthDate'
+                      type='date'
+                      {...register('birthDate')}
+                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    />
+                    {errors.birthDate?.message && (
+                      <p className='mt-2 text-sm font-medium text-red-400'>
+                        {errors.birthDate.message}
+                      </p>
+                    )}
+                  </div>
+
+                </div>
+                <div className='sm:col-span-4'>
+                  <label
+                    htmlFor='email'
+                    className='block text-sm font-bold leading-6 text-gray-900'
+                  >
+                    Email
+                  </label>
+                  <div className='block'>
+                    <input
+                      id='email'
+                      type='text'
+                      {...register('email')}
+                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    />
+                    {errors.birthDate?.message && (
+                      <p className='mt-2 text-sm font-medium text-red-400'>
+                        {errors.birthDate.message}
+                      </p>
+                    )}
+                  </div>
+
+                </div>
+
+                <div className='sm:col-span-2'>
+                  <label
+                    htmlFor='phone'
+                    className='block text-sm font-bold leading-6 text-gray-900'
+                  >
+                    Telefone
+                  </label>
+                  <div className='block'>
+                    <input
+                      id='phone'
+                      type='text'
+                      {...register('phone')}
+                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    />
+                    {errors.phone?.message && (
+                      <p className='mt-2 text-sm font-medium text-red-400'>
+                        {errors.phone.message}
+                      </p>
+                    )}
+                  </div>
+
+                </div>
+
+                <div className='sm:col-span-4'>
+                  <label
+                    htmlFor='address'
+                    className='block text-sm font-bold leading-6 text-gray-900'
+                  >
+                    Endereço
+                  </label>
+                  <div className='block'>
+                    <input
+                      id='address'
+                      type='text'
+                      {...register('address')}
+                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    />
+                    {errors.address?.message && (
+                      <p className='mt-2 text-sm font-medium text-red-400'>
+                        {errors.address.message}
+                      </p>
+                    )}
+                  </div>
+
+                </div>
+
+                <div className='sm:col-span-2'>
+                  <label
+                    htmlFor='zipCode'
+                    className='block text-sm font-bold leading-6 text-gray-900'
+                  >
+                    CEP
+                  </label>
+                  <div className='block'>
+                    <input
+                      id='zipCode'
+                      type='text'
+                      {...register('zipCode')}
+                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    />
+                    {errors.zipCode?.message && (
+                      <p className='mt-2 text-sm font-medium text-red-400'>
+                        {errors.zipCode.message}
+                      </p>
+                    )}
+                  </div>
+
+                </div>
+                <div className='sm:col-span-1'></div>
+                <div className='sm:col-span-2'>
+                  <label
+                    htmlFor='city'
+                    className='block text-sm font-bold leading-6 text-gray-900'
+                  >
+                    Cidade
+                  </label>
+                  <div className='block'>
+                    <input
+                      id='city'
+                      type='text'
+                      {...register('city')}
+                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    />
+                    {errors.city?.message && (
+                      <p className='mt-2 text-sm font-medium text-red-400'>
+                        {errors.city.message}
+                      </p>
+                    )}
+                  </div>
+
+                </div>
+
+
+                <div className='sm:col-span-2'>
+                  <label
+                    htmlFor='neighborhood'
+                    className='block text-sm font-bold leading-6 text-gray-900'
+                  >
+                    Bairro
+                  </label>
+                  <div className='block'>
+                    <input
+                      id='neighborhood'
+                      type='text'
+                      {...register('neighborhood')}
+                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    />
+                    {errors.neighborhood?.message && (
+                      <p className='mt-2 text-sm font-medium text-red-400'>
+                        {errors.neighborhood.message}
+                      </p>
+                    )}
+                  </div>
+
+                </div>
+
+
+                <div className='sm:col-span-1'>
+                  <label
+                    htmlFor='state'
+                    className='block text-sm font-bold leading-6 text-gray-900'
+                  >
+                    Estado
+                  </label>
+                  <div className='block'>
+                    <input
+                      id='state'
+                      type='text'
+                      {...register('state')}
+                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    />
+                    {errors.state?.message && (
+                      <p className='mt-2 text-sm font-medium text-red-400'>
+                        {errors.state.message}
+                      </p>
+                    )}
+                  </div>
+
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {currentStep === 1 && (
+            <motion.div
+              initial={{ x: delta >= 0 ? '50%' : '-50%', opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
             >
-              <path
-                strokeLinecap='round'
-                strokeLinejoin='round'
-                d='M8.25 4.5l7.5 7.5-7.5 7.5'
-              />
-            </svg>
-          </button>
+              <div className='mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6'>
+                <div className='sm:col-span-3'>
+                  <label
+                    htmlFor='country'
+                    className='block text-sm font-medium leading-6 text-gray-900'
+                  >
+                    Nome do Cônjuge
+                  </label>
+                  <div className='block'>
+                    <input
+                      id='spouseName'
+                      type='text'
+                      {...register('spouseName')}
+                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    />
+                    {errors.spouseName?.message && (
+                      <p className='mt-2 text-sm font-medium text-red-400'>
+                        {errors.spouseName.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {currentStep === 2 && (
+            <>
+              <h2 className='text-base font-semibold leading-7 text-gray-900'>
+                Complete
+              </h2>
+              <p className='mt-1 text-sm leading-6 text-gray-600'>
+                Thank you for your submission.
+              </p>
+            </>
+          )}
+        </form>
+
+        {/* Navigation */}
+        <div className='mt-8 pt-5'>
+          <div className='flex justify-between'>
+            <button
+              type='button'
+              onClick={prev}
+              disabled={currentStep === 0}
+              className='rounded bg-white px-2 py-1 text-sm font-semibold text-sky-900 shadow-sm ring-1 ring-inset ring-sky-300 hover:bg-sky-50 disabled:cursor-not-allowed disabled:opacity-50'
+            >
+              <svg
+                xmlns='http://www.w3.org/2000/svg'
+                fill='none'
+                viewBox='0 0 24 24'
+                strokeWidth='1.5'
+                stroke='currentColor'
+                className='h-6 w-6'
+              >
+                <path
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  d='M15.75 19.5L8.25 12l7.5-7.5'
+                />
+              </svg>
+            </button>
+            <button
+              type='button'
+              onClick={next}
+              disabled={currentStep === steps.length - 1}
+              className='rounded bg-white px-2 py-1 text-sm font-semibold text-sky-900 shadow-sm ring-1 ring-inset ring-sky-300 hover:bg-sky-50 disabled:cursor-not-allowed disabled:opacity-50'
+            >
+              <svg
+                xmlns='http://www.w3.org/2000/svg'
+                fill='none'
+                viewBox='0 0 24 24'
+                strokeWidth='1.5'
+                stroke='currentColor'
+                className='h-6 w-6'
+              >
+                <path
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  d='M8.25 4.5l7.5 7.5-7.5 7.5'
+                />
+              </svg>
+            </button>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
     </>
   )
 }
