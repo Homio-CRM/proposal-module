@@ -16,4 +16,5 @@ export const FormDataSchema = z.object({
   neighborhood: z.string().min(1, 'Bairro é Obrigatório'),
   city: z.string().min(1, 'Cidade é obrigatório'),
   state: z.string().min(1, 'Estado é obrigatório'),
+  spouseName: z.string()
 })
