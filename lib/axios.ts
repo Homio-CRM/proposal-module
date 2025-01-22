@@ -1,10 +1,10 @@
 import axios from "axios";
 
 const homio = axios.create({
-  baseURL: process.env.HOMIO_API_BASE_URL, 
-  timeout: 10000, 
+  baseURL: process.env.HOMIO_API_BASE_URL,
+  timeout: 10000,
   headers: {
-    "Content-Type": "application/json", 
+    "Content-Type": "application/json",
     Accept: "application/json",
   }
 });
@@ -20,5 +20,5 @@ const homio = axios.create({
 //       return Promise.reject(error);
 //     }
 //   );
-  
+
 export default homio;

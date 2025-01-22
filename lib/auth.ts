@@ -1,5 +1,4 @@
-// lib/auth.ts
-import { redirect } from "next/dist/server/api-utils";
+
 import homio from "./axios";
 
 interface TokenResponse {
