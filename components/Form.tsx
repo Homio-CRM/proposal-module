@@ -74,7 +74,7 @@ export default function Form() {
 
   return (
     <>
-      <section className='flex flex-col justify-between mt-6 '>
+      <section className='flex flex-col justify-between mt-6 ml-6 max-w-7xl'>
         {/* steps */}
         <nav aria-label='Progress'>
           <ol role='list' className='space-y-4 md:flex md:space-x-8 md:space-y-0'>
@@ -111,7 +111,7 @@ export default function Form() {
         </nav>
 
         {/* Form */}
-        <form className='mt-12 py-12 max-w-5xl' onSubmit={handleSubmit(processForm)}>
+        <form className='py-6 max-w-ml-65xl' onSubmit={handleSubmit(processForm)}>
           {currentStep === 0 && (
             <motion.div
               initial={{ x: delta >= 0 ? '50%' : '-50%', opacity: 0 }}
@@ -139,7 +139,7 @@ export default function Form() {
                       <Search className='text-blue-300 p-1' />
                     </button>
                     {errors.opportunityId?.message && (
-                      <p className='text-sm font-medium text-red-400 fixed mt-11'>
+                      <p className='text-sm font-medium text-red-400 absolute mt-11'>
                         {errors.opportunityId.message}
                       </p>
                     )}
@@ -234,7 +234,7 @@ export default function Form() {
                        placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
                     />
                     {errors.rg?.message && (
-                      <p className='mt-2 text-sm text-red-400'>
+                      <p className='mt-2 text-sm font-medium text-red-400'>
                         {errors.rg.message}
                       </p>
                     )}
@@ -257,7 +257,7 @@ export default function Form() {
                        placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
                     />
                     {errors.nationality?.message && (
-                      <p className='mt-2 text-sm text-red-400'>
+                      <p className='mt-2 text-sm font-medium text-red-400'>
                         {errors.nationality.message}
                       </p>
                     )}
@@ -540,48 +540,26 @@ export default function Form() {
 
         {/* Navigation */}
         <div className='mt-8 pt-5'>
-          <div className='flex justify-between'>
+          <div className='w-full bg-red-200 flex justify-end gap-6'>
             <button
               type='button'
               onClick={prev}
               disabled={currentStep === 0}
-              className='rounded bg-white px-2 py-1 text-sm font-semibold text-sky-900 shadow-sm ring-1 ring-inset ring-sky-300 hover:bg-sky-50 disabled:cursor-not-allowed disabled:opacity-50'
+              className={` rounded-full
+               bg-[#F3F1FF] px-16 py-2 text-md font-medium text-gray-500 shadow-sm 
+                hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50`}
             >
-              <svg
-                xmlns='http://www.w3.org/2000/svg'
-                fill='none'
-                viewBox='0 0 24 24'
-                strokeWidth='1.5'
-                stroke='currentColor'
-                className='h-6 w-6'
-              >
-                <path
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                  d='M15.75 19.5L8.25 12l7.5-7.5'
-                />
-              </svg>
+              Voltar
             </button>
             <button
               type='button'
               onClick={next}
               disabled={currentStep === steps.length - 1}
-              className='rounded bg-white px-2 py-1 text-sm font-semibold text-sky-900 shadow-sm ring-1 ring-inset ring-sky-300 hover:bg-sky-50 disabled:cursor-not-allowed disabled:opacity-50'
+              className='rounded-full bg-gradient-to-r from-purple-300
+               to-indigo-500 px-16 py-2 text-md font-medium text-indigo-0 
+               shadow-sm  hover:bg-sky-50  disabled:cursor-not-allowed disabled:opacity-50'
             >
-              <svg
-                xmlns='http://www.w3.org/2000/svg'
-                fill='none'
-                viewBox='0 0 24 24'
-                strokeWidth='1.5'
-                stroke='currentColor'
-                className='h-6 w-6'
-              >
-                <path
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                  d='M8.25 4.5l7.5 7.5-7.5 7.5'
-                />
-              </svg>
+              Próximo
             </button>
           </div>
         </div>

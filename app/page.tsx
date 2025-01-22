@@ -2,7 +2,6 @@ import React from 'react'
 import { Apartment } from '@/types/apartmentType'
 import { columns } from "@/components/columns"
 import { DataTable } from "@/components/data-table"
-import { cookies } from 'next/headers'
 import { getOrCreateToken } from '@/lib/auth'
 
 export const data: Apartment[] = [
@@ -41,7 +40,6 @@ export const data: Apartment[] = [
 
 
 export default async function Home() {
-  const cookieStore = await cookies()
   const token = getOrCreateToken()
   console.log(token)
 
