@@ -1,12 +1,8 @@
 import axios from "axios";
 
-const homio = axios.create({
-  baseURL: process.env.HOMIO_API_BASE_URL,
-  timeout: 10000,
-  headers: {
-    "Content-Type": "application/json",
-    Accept: "application/json",
-  }
+const mivita = axios.create({
+  baseURL: process.env.HOMIO_API_MIVITA_BASE_URL,
+  timeout: 10000
 });
 
 // homio.interceptors.response.use(
@@ -21,4 +17,4 @@ const homio = axios.create({
 //     }
 //   );
 
-export default homio;
+export default mivita;

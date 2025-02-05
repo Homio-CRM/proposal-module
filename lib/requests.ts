@@ -1,20 +1,17 @@
-import homio from "./axios";
-import { getLocalToken } from '@/lib/auth'
-import { getAccessToken } from '@/lib/auth'
+import mivita from "./axiosMivita";
 
-export async function getOpportunities(opportunityId: string, token: string): Promise<object> {
+export async function getOpportunities(opportunityId: string): Promise<object> {
     try {
-      const response = await homio.get<object>(
-        "/opportunities/" + opportunityId,
-        {
-          headers: {
-              Accept: 'application/json',
-              Authorization: "Bearer " + token,
-              Version: "2021-07-28"
-          },
-        }
-      );
-
+      const USERNAME = process.env.HOMIO_API_MIVITA_USER;
+      const PASSWORD = process.env.HOMIO_API_MIVITA_PASS;
+      const response = await mivita.get<object>(
+        "/opportunities/?id=" + opportunityId,
+      {
+        headers: {
+          Authorization: "Basic " + Buffer.from(`${USERNAME}:${PASSWORD}`).toString("base64"),
+        },
+      }
+    );
       return response.data;
     } catch (error) {
         console.error("Erro ao obter as oportinidades", error);
