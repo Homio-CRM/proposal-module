@@ -1,7 +1,7 @@
 // lib/tokenManager.ts
 import express from "express";
 import { redirect } from "next/dist/server/api-utils";
-import homio from "./axios";
+import homio from "./axiosHomio";
 import cookieParser from "cookie-parser";
 import { promises } from "dns";
 
