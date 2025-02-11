@@ -24,7 +24,7 @@ export async function getContacts(ContactId: string): Promise<object> {
       const USERNAME = process.env.HOMIO_API_MIVITA_USER;
       const PASSWORD = process.env.HOMIO_API_MIVITA_PASS;
       const body = {
-        locationId: "Ew4LzbKZmyOVYwv4iwDI",
+        locationId: process.env.LOCATION_ID_MIVITA,
         pageLimit: 1, 
         page: 1
       };
