@@ -1,13 +1,13 @@
 import React from 'react'
 import Form from '@/components/Form'
-import { getOpportunities } from '@/lib/requests';
-import { getContacts } from '@/lib/requests';
+import { GetOpportunities } from '@/lib/requests';
+import { GetContacts } from '@/lib/requests';
 
 const proposals = async () => {
-  const opportunity = await getOpportunities('AUqyVuQlzu7fAFupcoNl');
+  const opportunity = await GetOpportunities('AUqyVuQlzu7fAFupcoNl');
   console.log(opportunity);
-  const contact = await getContacts('XB6C3FsgPmyRctL5Elap');
-  console.log(contact);
+  // const contact = await GetContacts('XB6C3FsgPmyRctL5Elap');
+  // console.log(contact);
   return (
     <div className='mt-24 ml-28 font-bold'>
       <h1 className='text-gray-900 text-3xl'>Criar nova proposta</h1>

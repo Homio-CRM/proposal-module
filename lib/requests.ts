@@ -1,9 +1,10 @@
 import mivita from "./axiosMivita";
 
-export async function getOpportunities(opportunityId: string): Promise<object> {
+export async function GetOpportunities(opportunityId: string): Promise<object> {
     try {
       const USERNAME = process.env.HOMIO_API_MIVITA_USER;
       const PASSWORD = process.env.HOMIO_API_MIVITA_PASS;
+      console.log("Chamando API em:", mivita.defaults.baseURL);
       const response = await mivita.get<object>(
         "/opportunities/?id=" + opportunityId,
       {
@@ -19,7 +20,7 @@ export async function getOpportunities(opportunityId: string): Promise<object> {
     }
 }
 
-export async function getContacts(ContactId: string): Promise<object> {
+export async function GetContacts(ContactId: string): Promise<object> {
     try {
       const USERNAME = process.env.HOMIO_API_MIVITA_USER;
       const PASSWORD = process.env.HOMIO_API_MIVITA_PASS;

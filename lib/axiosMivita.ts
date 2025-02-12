@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const mivita = axios.create({
-  baseURL: process.env.HOMIO_API_MIVITA_BASE_URL,
+  baseURL: process.env.REACT_APP_HOMIO_API_MIVITA_BASE_URL,
   timeout: 10000
 });
 
