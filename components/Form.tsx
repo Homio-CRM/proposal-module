@@ -7,9 +7,8 @@ import { Search } from 'lucide-react'
 import { z } from 'zod'
 import { FormDataSchema } from '@/types/formSchema'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm, SubmitHandler, useWatch} from 'react-hook-form'
-import { GetOpportunities } from '@/lib/requests';
-import { GetContacts } from '@/lib/requests';
+import { useForm, SubmitHandler, useWatch } from 'react-hook-form'
+
 
 
 
@@ -31,6 +30,9 @@ const steps = [
   { id: 'Step 3', name: 'Complete' }
 ]
 
+
+
+
 export default function Form() {
   const [previousStep, setPreviousStep] = useState(0)
   const [currentStep, setCurrentStep] = useState(0)
@@ -41,7 +43,7 @@ export default function Form() {
     handleSubmit,
     reset,
     trigger,
-    control, 
+    control,
     watch,
     formState: { errors }
   } = useForm<Inputs>({
@@ -52,8 +54,6 @@ export default function Form() {
     console.log(data)
     reset()
   }
-
-  type FieldName = keyof Inputs
 
   const next = async () => {
     const fields = steps[currentStep].fields
@@ -77,17 +77,6 @@ export default function Form() {
     }
   }
 
-const opportunityId = '' + watch('opportunityId')
-const handleSearchOpportunity = async () => {
-  if (!opportunityId) return
-  try {
-      const data = await GetOpportunities('AUqyVuQlzu7fAFupcoNl')
-      console.log(data)
-      reset(data)
-    } catch (error) {
-      console.error('Erro ao buscar oportunidade:', error)
-    }
-  }
 
   return (
     <>
@@ -153,8 +142,8 @@ const handleSearchOpportunity = async () => {
                       className='block w-full bg-transparent p-1.5 pl-3 placeholder:gray-200 font-medium focus:bg-white !outline-none sm:text-sm sm:leading-6'
                     />
                     <button type='button'
-                      onClick={handleSearchOpportunity}
                       className='p-1.5'>
+
                       <Search className='text-blue-300 p-1' />
                     </button>
                     {errors.opportunityId?.message && (
