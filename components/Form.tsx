@@ -1,12 +1,13 @@
 'use client'
 
+import React from 'react'
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Search } from 'lucide-react'
 import { z } from 'zod'
 import { FormDataSchema } from '@/types/formSchema'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm, SubmitHandler, useFieldArray } from 'react-hook-form'
+import { useForm, SubmitHandler, useFieldArray,  useWatch } from 'react-hook-form'
 import { Button } from "@/components/ui/button";
 
 
@@ -40,6 +41,9 @@ const steps = [
   { id: 'Step 5', name: 'Complete' }
 ]
 
+
+
+
 export default function Form() {
   const teste = process.env.HOMIO_API_MIVITA_BASE_URL
   const [previousStep, setPreviousStep] = useState(0)
@@ -54,6 +58,7 @@ export default function Form() {
     reset,
     trigger,
     control,
+    watch,
     formState: { errors }
   } = useForm<Inputs>({
     resolver: zodResolver(FormDataSchema)
@@ -68,8 +73,6 @@ export default function Form() {
     console.log(data)
     reset()
   }
-
-  type FieldName = keyof Inputs
 
   const next = async () => {
     const fields = steps[currentStep].fields
@@ -92,6 +95,7 @@ export default function Form() {
       setCurrentStep(step => step - 1)
     }
   }
+
 
   const toggleSelectAll = () => {
     if (selectAll) {
@@ -179,7 +183,9 @@ export default function Form() {
                       autoComplete='given-name'
                       className='block w-full bg-transparent p-1.5 pl-3 placeholder:gray-200 font-medium focus:bg-white !outline-none sm:text-sm sm:leading-6'
                     />
-                    <button className='p-1.5'>
+                    <button type='button'
+                      className='p-1.5'>
+
                       <Search className='text-blue-300 p-1' />
                     </button>
                     {errors.opportunityId?.message && (
