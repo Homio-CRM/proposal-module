@@ -6,8 +6,8 @@ import { Search } from 'lucide-react'
 import { z } from 'zod'
 import { FormDataSchema } from '@/types/formSchema'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm, SubmitHandler } from 'react-hook-form'
-
+import { useForm, SubmitHandler, useFieldArray } from 'react-hook-form'
+import { Button } from "@/components/ui/button";
 
 
 type Inputs = z.infer<typeof FormDataSchema>
@@ -33,7 +33,7 @@ const steps = [
   },
   {
     id: 'Step 4',
-    name: 'Address',
+    name: 'ddress',
     fields: ['country', 'state', 'city', 'street', 'zip'],
     subTitle: 'Confira os dados do cônjuge'
   },
@@ -41,8 +41,11 @@ const steps = [
 ]
 
 export default function Form() {
+  const teste = process.env.HOMIO_API_MIVITA_BASE_URL
   const [previousStep, setPreviousStep] = useState(0)
   const [currentStep, setCurrentStep] = useState(0)
+  const [selectedRows, setSelectedRows] = useState<number[]>([]);
+  const [selectAll, setSelectAll] = useState<boolean>(false);
   const delta = currentStep - previousStep
 
   const {
@@ -50,10 +53,16 @@ export default function Form() {
     handleSubmit,
     reset,
     trigger,
+    control,
     formState: { errors }
   } = useForm<Inputs>({
     resolver: zodResolver(FormDataSchema)
   })
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "installments",
+  });
 
   const processForm: SubmitHandler<Inputs> = data => {
     console.log(data)
@@ -83,6 +92,29 @@ export default function Form() {
       setCurrentStep(step => step - 1)
     }
   }
+
+  const toggleSelectAll = () => {
+    if (selectAll) {
+      setSelectedRows([]);
+    } else {
+      setSelectedRows(fields.map((_, index) => index));
+    }
+    setSelectAll(!selectAll);
+  };
+
+  const toggleRowSelection = (index: number) => {
+    setSelectedRows((prev) =>
+      prev.includes(index)
+        ? prev.filter((i) => i !== index)
+        : [...prev, index]
+    );
+  };
+
+  const handleDeleteSelected = () => {
+    remove(selectedRows);
+    setSelectedRows([]);
+    setSelectAll(false);
+  };
 
   return (
     <>
@@ -910,9 +942,25 @@ export default function Form() {
               animate={{ x: 0, opacity: 1 }}
               transition={{ duration: 0.3, ease: 'easeInOut' }}
             >
-              <table className="w-full border-collapse border border-gray">
+              <div className="w-full flex justify-end">
+                <Button
+                  type="button"
+                  onClick={() => append({ type: "Sinal", value: "", amount: 1, percentage: "100%", paymentDate: "" })}
+                  className="m-2.5 bg-indigo-500 hover:bg-indigo-600 text-md"
+                >
+                  + Nova Parcela
+                </Button>
+              </div>
+              <table className="w-full border-collapse border border-gray-300">
                 <thead>
-                  <tr className="bg-gray-">
+                  <tr className="bg-gray-200">
+                    <th className="border p-2">
+                      <input
+                        type="checkbox"
+                        checked={selectAll}
+                        onChange={toggleSelectAll}
+                      />
+                    </th>
                     <th className="border p-2">Condição</th>
                     <th className="border p-2">Valor</th>
                     <th className="border p-2">Qnt. de Parcelas</th>
@@ -920,7 +968,66 @@ export default function Form() {
                     <th className="border p-2">Data</th>
                   </tr>
                 </thead>
+                <tbody>
+                  {fields.map((item, index) => (
+                    <tr key={item.id} className="border">
+                      <td className="border p-2 text-center">
+                        <input
+                          type="checkbox"
+                          checked={selectedRows.includes(index)}
+                          onChange={() => toggleRowSelection(index)}
+                        />
+                      </td>
+                      <td className="border p-2">
+                        <select className="border p-1 w-full" {...register(`installments.${index}.type`)}>
+                          <option value="">Selecione</option>
+                          <option value="Sinal">Sinal</option>
+                          <option value="Parcela única">Parcela única</option>
+                          <option value="Mensais">Mensais</option>
+                          <option value="Financiamento">Financiamento</option>
+                        </select>
+                      </td>
+                      <td className="border p-2">
+                        <input
+                          type="text"
+                          className="border p-1 w-full"
+                          {...register(`installments.${index}.value`)}
+                        />
+                      </td>
+                      <td className="border p-2">
+                        <input
+                          type="number"
+                          className="border p-1 w-full"
+                          {...register(`installments.${index}.amount`, { valueAsNumber: true })}
+                        />
+                      </td>
+                      <td className="border p-2">
+                        <input
+                          type="text"
+                          className="border p-1 w-full"
+                          {...register(`installments.${index}.percentage`)}
+                        />
+                      </td>
+                      <td className="border p-2">
+                        <input
+                          type="date"
+                          className="border p-1 w-full"
+                          {...register(`installments.${index}.paymentDate`)}
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
               </table>
+
+              <div className="mt-4 flex gap-4">
+                <Button type="button" onClick={handleDeleteSelected} disabled={selectedRows.length === 0}>
+                  Excluir Selecionados
+                </Button>
+                <Button type="submit">Salvar</Button>
+              </div>
+
+
             </motion.div>
           )}
           {currentStep === 4 && (
@@ -951,12 +1058,11 @@ export default function Form() {
             <button
               type='button'
               onClick={next}
-              disabled={currentStep === steps.length - 1}
               className='rounded-full bg-gradient-to-r from-purple-300
                to-indigo-500 px-16 py-2 text-md font-medium text-indigo-0 
                shadow-sm  hover:bg-sky-50  disabled:cursor-not-allowed disabled:opacity-50'
             >
-              Próximo
+              {currentStep === steps.length - 1 ? "Finalizar" : "Próximo"}
             </button>
           </div>
         </div>
