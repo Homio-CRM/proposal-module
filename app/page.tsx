@@ -2,7 +2,6 @@ import React from 'react'
 import { Apartment } from '@/types/apartmentType'
 import { columns } from "@/components/columns"
 import { DataTable } from "@/components/data-table"
-import { cookies } from 'next/headers'
 import { getOrCreateToken } from '@/lib/auth'
 
 
@@ -46,6 +45,7 @@ import { getOrCreateToken } from '@/lib/auth'
   ]
 
 export default function Home() {
+
   return (
     <div >
     <DataTable columns={columns} data={data} />

@@ -7,9 +7,8 @@ import { Search } from 'lucide-react'
 import { z } from 'zod'
 import { FormDataSchema } from '@/types/formSchema'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm, SubmitHandler, useWatch } from 'react-hook-form'
-
-
+import { useForm, SubmitHandler, useFieldArray,  useWatch } from 'react-hook-form'
+import { Button } from "@/components/ui/button";
 
 
 type Inputs = z.infer<typeof FormDataSchema>
@@ -23,19 +22,34 @@ const steps = [
   },
   {
     id: 'Step 2',
+    name: 'Con',
+    fields: ['country', 'state', 'city', 'street', 'zip'],
+    subTitle: 'Confira os dados do cônjuge'
+  },
+  {
+    id: 'Step 3',
     name: 'Address',
     fields: ['country', 'state', 'city', 'street', 'zip'],
     subTitle: 'Confira os dados do cônjuge'
   },
-  { id: 'Step 3', name: 'Complete' }
+  {
+    id: 'Step 4',
+    name: 'ddress',
+    fields: ['country', 'state', 'city', 'street', 'zip'],
+    subTitle: 'Confira os dados do cônjuge'
+  },
+  { id: 'Step 5', name: 'Complete' }
 ]
 
 
 
 
 export default function Form() {
+  const teste = process.env.HOMIO_API_MIVITA_BASE_URL
   const [previousStep, setPreviousStep] = useState(0)
   const [currentStep, setCurrentStep] = useState(0)
+  const [selectedRows, setSelectedRows] = useState<number[]>([]);
+  const [selectAll, setSelectAll] = useState<boolean>(false);
   const delta = currentStep - previousStep
 
   const {
@@ -49,6 +63,11 @@ export default function Form() {
   } = useForm<Inputs>({
     resolver: zodResolver(FormDataSchema)
   })
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "installments",
+  });
 
   const processForm: SubmitHandler<Inputs> = data => {
     console.log(data)
@@ -78,9 +97,32 @@ export default function Form() {
   }
 
 
+  const toggleSelectAll = () => {
+    if (selectAll) {
+      setSelectedRows([]);
+    } else {
+      setSelectedRows(fields.map((_, index) => index));
+    }
+    setSelectAll(!selectAll);
+  };
+
+  const toggleRowSelection = (index: number) => {
+    setSelectedRows((prev) =>
+      prev.includes(index)
+        ? prev.filter((i) => i !== index)
+        : [...prev, index]
+    );
+  };
+
+  const handleDeleteSelected = () => {
+    remove(selectedRows);
+    setSelectedRows([]);
+    setSelectAll(false);
+  };
+
   return (
     <>
-      <section className='flex flex-col justify-between mt-6 '>
+      <section className='flex flex-col justify-between mt-6 ml-6 max-w-7xl'>
         {/* steps */}
         <nav aria-label='Progress'>
           <ol role='list' className='space-y-4 md:flex md:space-x-8 md:space-y-0'>
@@ -117,7 +159,7 @@ export default function Form() {
         </nav>
 
         {/* Form */}
-        <form className='mt-12 py-12 max-w-5xl' onSubmit={handleSubmit(processForm)}>
+        <form className='py-6 max-w-ml-65xl' onSubmit={handleSubmit(processForm)}>
           {currentStep === 0 && (
             <motion.div
               initial={{ x: delta >= 0 ? '50%' : '-50%', opacity: 0 }}
@@ -147,7 +189,7 @@ export default function Form() {
                       <Search className='text-blue-300 p-1' />
                     </button>
                     {errors.opportunityId?.message && (
-                      <p className='text-sm font-medium text-red-400 fixed mt-11'>
+                      <p className='text-sm font-medium text-red-400 absolute mt-11'>
                         {errors.opportunityId.message}
                       </p>
                     )}
@@ -242,7 +284,7 @@ export default function Form() {
                        placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
                     />
                     {errors.rg?.message && (
-                      <p className='mt-2 text-sm text-red-400'>
+                      <p className='mt-2 text-sm font-medium text-red-400'>
                         {errors.rg.message}
                       </p>
                     )}
@@ -265,7 +307,7 @@ export default function Form() {
                        placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
                     />
                     {errors.nationality?.message && (
-                      <p className='mt-2 text-sm text-red-400'>
+                      <p className='mt-2 text-sm font-medium text-red-400'>
                         {errors.nationality.message}
                       </p>
                     )}
@@ -506,13 +548,14 @@ export default function Form() {
               animate={{ x: 0, opacity: 1 }}
               transition={{ duration: 0.3, ease: 'easeInOut' }}
             >
-              <div className='mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6'>
-                <div className='sm:col-span-3'>
+              <div className='mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-8'>
+
+                <div className='sm:col-span-4'>
                   <label
-                    htmlFor='country'
-                    className='block text-sm font-medium leading-6 text-gray-900'
+                    htmlFor='spouseName'
+                    className='block text-sm font-bold leading-6 text-gray-900'
                   >
-                    Nome do Cônjuge
+                    Cônjuge
                   </label>
                   <div className='block'>
                     <input
@@ -529,12 +572,471 @@ export default function Form() {
                       </p>
                     )}
                   </div>
+
+                </div>
+                <div className='sm:col-span-2'>
+                  <label
+                    htmlFor='spouseCpf'
+                    className='block text-sm font-bold leading-6 text-gray-900'
+                  >
+                    CPF
+                  </label>
+                  <div className='block'>
+                    <input
+                      id='spouseCpf'
+                      type='text'
+                      {...register('spouseCpf')}
+                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    />
+                    {errors.spouseCpf?.message && (
+                      <p className='mt-2 text-sm font-medium text-red-400'>
+                        {errors.spouseCpf.message}
+                      </p>
+                    )}
+                  </div>
+
+                </div>
+                <div className='sm:col-span-2'>
+                  <label
+                    htmlFor='spouseRg'
+                    className='block text-sm font-bold leading-6 text-gray-900'
+                  >
+                    RG
+                  </label>
+                  <div className='block'>
+                    <input
+                      id='spouseRg'
+                      type='text'
+                      {...register('spouseRg')}
+                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    />
+                    {errors.spouseRg?.message && (
+                      <p className='mt-2 text-sm font-medium text-red-400'>
+                        {errors.spouseRg.message}
+                      </p>
+                    )}
+                  </div>
+
+                </div>
+                <div className='sm:col-span-4'>
+                  <label
+                    htmlFor='spouceNationality'
+                    className='block text-sm font-bold leading-6 text-gray-900'
+                  >
+                    Nacionalidade
+                  </label>
+                  <div className='block'>
+                    <input
+                      id='spouseNationality'
+                      type='text'
+                      {...register('spouseNationality')}
+                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    />
+                    {errors.spouseNationality?.message && (
+                      <p className='mt-2 text-sm font-medium text-red-400'>
+                        {errors.spouseNationality.message}
+                      </p>
+                    )}
+                  </div>
+
+                </div>
+                <div className='sm:col-span-4'>
+                  <label
+                    htmlFor='spouceOcuppation'
+                    className='block text-sm font-bold leading-6 text-gray-900'
+                  >
+                    Profissão
+                  </label>
+                  <div className='block'>
+                    <input
+                      id='spouseOccupation'
+                      type='text'
+                      {...register('spouseOccupation')}
+                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    />
+                    {errors.spouseOccupation?.message && (
+                      <p className='mt-2 text-sm font-medium text-red-400'>
+                        {errors.spouseOccupation.message}
+                      </p>
+                    )}
+                  </div>
+
+                </div>
+                <div className='sm:col-span-4'>
+                  <label
+                    htmlFor='spouceOcuppation'
+                    className='block text-sm font-bold leading-6 text-gray-900'
+                  >
+                    Email
+                  </label>
+                  <div className='block'>
+                    <input
+                      id='spouseEmail'
+                      type='text'
+                      {...register('spouseEmail')}
+                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    />
+                    {errors.spouseEmail?.message && (
+                      <p className='mt-2 text-sm font-medium text-red-400'>
+                        {errors.spouseEmail.message}
+                      </p>
+                    )}
+                  </div>
+
+                </div>
+                <div className='sm:col-span-2'>
+                  <label
+                    htmlFor='spouceOcuppation'
+                    className='block text-sm font-bold leading-6 text-gray-900'
+                  >
+                    Telefone
+                  </label>
+                  <div className='block'>
+                    <input
+                      id='spousePhone'
+                      type='text'
+                      {...register('spousePhone')}
+                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    />
+                    {errors.spousePhone?.message && (
+                      <p className='mt-2 text-sm font-medium text-red-400'>
+                        {errors.spousePhone.message}
+                      </p>
+                    )}
+                  </div>
+
                 </div>
               </div>
             </motion.div>
           )}
 
           {currentStep === 2 && (
+            <motion.div
+              initial={{ x: delta >= 0 ? '50%' : '-50%', opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+            >
+              <div className='mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-8'>
+
+                <div className='sm:col-span-4'>
+                  <label
+                    htmlFor='spouseName'
+                    className='block text-sm font-bold leading-6 text-gray-900'
+                  >
+                    Empreendimento
+                  </label>
+                  <div className='block'>
+                    <select
+                      id='building'
+                      {...register('building')}
+                      className='px-3 w-full rounded-md border-0 py-2.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    >
+                      <option value="Serena By Mivita">Serena By Mivita</option>
+                      <option value="Lago By Mivita">Lago By Mivita</option>
+                      <option value="Stage Praia do Canto">Stage Praia do Canto</option>
+                      <option value="Next Jardim da Penha">Next Jardim da Penha</option>
+                      <option value="Inside Jardim da Penha">Inside Jardim da Penha</option>
+                      <option value="Quartzo By Mivita">Quartzo By Mivita</option>
+                    </select>
+                    {errors.building?.message && (
+                      <p className='mt-2 text-sm font-medium text-red-400'>
+                        {errors.building.message}
+                      </p>
+                    )}
+                  </div>
+
+                </div>
+                <div className='sm:col-span-4'></div>
+                <div className='sm:col-span-2'>
+                  <label
+                    htmlFor='apartmentUnity'
+                    className='block text-sm font-bold leading-6 text-gray-900'
+                  >
+                    Unidade
+                  </label>
+                  <div className='block'>
+                    <input
+                      id='apartmentUnity'
+                      type='text'
+                      {...register('apartmentUnity')}
+                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    />
+                    {errors.apartmentUnity?.message && (
+                      <p className='mt-2 text-sm font-medium text-red-400'>
+                        {errors.apartmentUnity.message}
+                      </p>
+                    )}
+                  </div>
+
+                </div>
+                <div className='sm:col-span-2'>
+                  <label
+                    htmlFor='floor'
+                    className='block text-sm font-bold leading-6 text-gray-900'
+                  >
+                    Pavimento
+                  </label>
+                  <div className='floor'>
+                    <input
+                      id='floor'
+                      type='text'
+                      {...register('floor')}
+                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    />
+                    {errors.floor?.message && (
+                      <p className='mt-2 text-sm font-medium text-red-400'>
+                        {errors.floor.message}
+                      </p>
+                    )}
+                  </div>
+
+                </div>
+                <div className='sm:col-span-1'>
+                  <label
+                    htmlFor='tower'
+                    className='block text-sm font-bold leading-6 text-gray-900'
+                  >
+                    Torre
+                  </label>
+                  <div className='block'>
+                    <input
+                      id='tower'
+                      type='text'
+                      {...register('tower')}
+                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    />
+                    {errors.tower?.message && (
+                      <p className='mt-2 text-sm font-medium text-red-400'>
+                        {errors.tower.message}
+                      </p>
+                    )}
+                  </div>
+
+                </div>
+                <div className='sm:col-span-3'></div>
+                <div className='sm:col-span-4'>
+                  <label
+                    htmlFor='vendor'
+                    className='block text-sm font-bold leading-6 text-gray-900'
+                  >
+                    Responsável
+                  </label>
+                  <div className='block'>
+                    <input
+                      id='vendor'
+                      type='text'
+                      {...register('vendor')}
+                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    />
+                    {errors.vendor?.message && (
+                      <p className='mt-2 text-sm font-medium text-red-400'>
+                        {errors.vendor.message}
+                      </p>
+                    )}
+                  </div>
+
+                </div>
+                <div className='sm:col-span-2
+                '>
+                  <label
+                    htmlFor='reserved'
+                    className='block text-sm font-bold leading-6 text-gray-900'
+                  >
+                    Reservado até
+                  </label>
+                  <div className='block'>
+                    <input
+                      id='reservedUntill'
+                      type='date'
+                      {...register('reservedUntill')}
+                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    />
+                    {errors.reservedUntill?.message && (
+                      <p className='mt-2 text-sm font-medium text-red-400'>
+                        {errors.reservedUntill.message}
+                      </p>
+                    )}
+                  </div>
+
+                </div>
+                <div className='sm:col-span-4'>
+                  <label
+                    htmlFor='observations'
+                    className='block text-sm font-bold leading-6 text-gray-900'
+                  >
+                    Observações
+                  </label>
+                  <div className='block'>
+
+                    <textarea
+                      rows={5}
+                      id='observations'
+                      {...register('observations')}
+                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    >
+
+                    </textarea>
+                    {errors.observations?.message && (
+                      <p className='mt-2 text-sm font-medium text-red-400'>
+                        {errors.observations.message}
+                      </p>
+                    )}
+                  </div>
+
+                </div>
+                <div className='sm:col-span-2'>
+                  <label
+                    htmlFor='contractDate'
+                    className='block text-sm font-bold leading-6 text-gray-900'
+                  >
+                    Data do Contrato
+                  </label>
+                  <div className='block'>
+
+                    <input
+                      type='date'
+                      id='contractDate'
+                      {...register('contractDate')}
+                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    />
+
+
+                    {errors.contractDate?.message && (
+                      <p className='mt-2 text-sm font-medium text-red-400'>
+                        {errors.contractDate.message}
+                      </p>
+                    )}
+                  </div>
+
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+
+          {currentStep === 3 && (
+            <motion.div
+              initial={{ x: delta >= 0 ? '50%' : '-50%', opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+            >
+              <div className="w-full flex justify-end">
+                <Button
+                  type="button"
+                  onClick={() => append({ type: "Sinal", value: "", amount: 1, percentage: "100%", paymentDate: "" })}
+                  className="m-2.5 bg-indigo-500 hover:bg-indigo-600 text-md"
+                >
+                  + Nova Parcela
+                </Button>
+              </div>
+              <table className="w-full border-collapse border border-gray-300">
+                <thead>
+                  <tr className="bg-gray-200">
+                    <th className="border p-2">
+                      <input
+                        type="checkbox"
+                        checked={selectAll}
+                        onChange={toggleSelectAll}
+                      />
+                    </th>
+                    <th className="border p-2">Condição</th>
+                    <th className="border p-2">Valor</th>
+                    <th className="border p-2">Qnt. de Parcelas</th>
+                    <th className="border p-2">Percentual</th>
+                    <th className="border p-2">Data</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {fields.map((item, index) => (
+                    <tr key={item.id} className="border">
+                      <td className="border p-2 text-center">
+                        <input
+                          type="checkbox"
+                          checked={selectedRows.includes(index)}
+                          onChange={() => toggleRowSelection(index)}
+                        />
+                      </td>
+                      <td className="border p-2">
+                        <select className="border p-1 w-full" {...register(`installments.${index}.type`)}>
+                          <option value="">Selecione</option>
+                          <option value="Sinal">Sinal</option>
+                          <option value="Parcela única">Parcela única</option>
+                          <option value="Mensais">Mensais</option>
+                          <option value="Financiamento">Financiamento</option>
+                        </select>
+                      </td>
+                      <td className="border p-2">
+                        <input
+                          type="text"
+                          className="border p-1 w-full"
+                          {...register(`installments.${index}.value`)}
+                        />
+                      </td>
+                      <td className="border p-2">
+                        <input
+                          type="number"
+                          className="border p-1 w-full"
+                          {...register(`installments.${index}.amount`, { valueAsNumber: true })}
+                        />
+                      </td>
+                      <td className="border p-2">
+                        <input
+                          type="text"
+                          className="border p-1 w-full"
+                          {...register(`installments.${index}.percentage`)}
+                        />
+                      </td>
+                      <td className="border p-2">
+                        <input
+                          type="date"
+                          className="border p-1 w-full"
+                          {...register(`installments.${index}.paymentDate`)}
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              <div className="mt-4 flex gap-4">
+                <Button type="button" onClick={handleDeleteSelected} disabled={selectedRows.length === 0}>
+                  Excluir Selecionados
+                </Button>
+                <Button type="submit">Salvar</Button>
+              </div>
+
+
+            </motion.div>
+          )}
+          {currentStep === 4 && (
             <>
               <h2 className='text-base font-semibold leading-7 text-gray-900'>
                 Complete
@@ -548,48 +1050,25 @@ export default function Form() {
 
         {/* Navigation */}
         <div className='mt-8 pt-5'>
-          <div className='flex justify-between'>
+          <div className='w-full flex justify-end gap-6'>
             <button
               type='button'
               onClick={prev}
               disabled={currentStep === 0}
-              className='rounded bg-white px-2 py-1 text-sm font-semibold text-sky-900 shadow-sm ring-1 ring-inset ring-sky-300 hover:bg-sky-50 disabled:cursor-not-allowed disabled:opacity-50'
+              className={` rounded-full
+               bg-[#F3F1FF] px-16 py-2 text-md font-medium text-gray-500 shadow-sm 
+                hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50`}
             >
-              <svg
-                xmlns='http://www.w3.org/2000/svg'
-                fill='none'
-                viewBox='0 0 24 24'
-                strokeWidth='1.5'
-                stroke='currentColor'
-                className='h-6 w-6'
-              >
-                <path
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                  d='M15.75 19.5L8.25 12l7.5-7.5'
-                />
-              </svg>
+              Voltar
             </button>
             <button
               type='button'
               onClick={next}
-              disabled={currentStep === steps.length - 1}
-              className='rounded bg-white px-2 py-1 text-sm font-semibold text-sky-900 shadow-sm ring-1 ring-inset ring-sky-300 hover:bg-sky-50 disabled:cursor-not-allowed disabled:opacity-50'
+              className='rounded-full bg-gradient-to-r from-purple-300
+               to-indigo-500 px-16 py-2 text-md font-medium text-indigo-0 
+               shadow-sm  hover:bg-sky-50  disabled:cursor-not-allowed disabled:opacity-50'
             >
-              <svg
-                xmlns='http://www.w3.org/2000/svg'
-                fill='none'
-                viewBox='0 0 24 24'
-                strokeWidth='1.5'
-                stroke='currentColor'
-                className='h-6 w-6'
-              >
-                <path
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                  d='M8.25 4.5l7.5 7.5-7.5 7.5'
-                />
-              </svg>
+              {currentStep === steps.length - 1 ? "Finalizar" : "Próximo"}
             </button>
           </div>
         </div>
