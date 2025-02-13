@@ -33,7 +33,7 @@ const steps = [
   },
   {
     id: 'Step 4',
-    name: 'Address',
+    name: 'ddress',
     fields: ['country', 'state', 'city', 'street', 'zip'],
     subTitle: 'Confira os dados do cônjuge'
   },
@@ -44,10 +44,8 @@ export default function Form() {
   const teste = process.env.HOMIO_API_MIVITA_BASE_URL
   const [previousStep, setPreviousStep] = useState(0)
   const [currentStep, setCurrentStep] = useState(0)
-  const [selectedRows, setSelectedRows] = useState([]);
-  const [selectAll, setSelectAll] = useState(false);
-  console.log(teste)
-
+  const [selectedRows, setSelectedRows] = useState<number[]>([]);
+  const [selectAll, setSelectAll] = useState<boolean>(false);
   const delta = currentStep - previousStep
 
   const {
@@ -104,7 +102,7 @@ export default function Form() {
     setSelectAll(!selectAll);
   };
 
-  const toggleRowSelection = (index) => {
+  const toggleRowSelection = (index: number) => {
     setSelectedRows((prev) =>
       prev.includes(index)
         ? prev.filter((i) => i !== index)
@@ -117,6 +115,7 @@ export default function Form() {
     setSelectedRows([]);
     setSelectAll(false);
   };
+
   return (
     <>
       <section className='flex flex-col justify-between mt-6 ml-6 max-w-7xl'>
@@ -943,92 +942,92 @@ export default function Form() {
               animate={{ x: 0, opacity: 1 }}
               transition={{ duration: 0.3, ease: 'easeInOut' }}
             >
-              <div className="p-4 bg-white shadow rounded-lg relative">
+              <div className="w-full flex justify-end">
                 <Button
                   type="button"
                   onClick={() => append({ type: "Sinal", value: "", amount: 1, percentage: "100%", paymentDate: "" })}
-                  className="absolute top-0 right-0 mt-2 mr-2"
+                  className="m-2.5 bg-indigo-500 hover:bg-indigo-600 text-md"
                 >
                   + Nova Parcela
                 </Button>
-                <form onSubmit={handleSubmit((data) => console.log("Dados enviados:", data))}>
-                  <table className="w-full border-collapse border border-gray-300">
-                    <thead>
-                      <tr className="bg-gray-200">
-                        <th className="border p-2">
-                          <input
-                            type="checkbox"
-                            checked={selectAll}
-                            onChange={toggleSelectAll}
-                          />
-                        </th>
-                        <th className="border p-2">Condição</th>
-                        <th className="border p-2">Valor</th>
-                        <th className="border p-2">Qnt. de Parcelas</th>
-                        <th className="border p-2">Percentual</th>
-                        <th className="border p-2">Data</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {fields.map((item, index) => (
-                        <tr key={item.id} className="border">
-                          <td className="border p-2 text-center">
-                            <input
-                              type="checkbox"
-                              checked={selectedRows.includes(index)}
-                              onChange={() => toggleRowSelection(index)}
-                            />
-                          </td>
-                          <td className="border p-2">
-                            <select className="border p-1 w-full" {...register(`installments.${index}.type`)}>
-                              <option value="">Selecione</option>
-                              <option value="Sinal">Sinal</option>
-                              <option value="Parcela única">Parcela única</option>
-                              <option value="Mensais">Mensais</option>
-                              <option value="Financiamento">Financiamento</option>
-                            </select>
-                          </td>
-                          <td className="border p-2">
-                            <input
-                              type="text"
-                              className="border p-1 w-full"
-                              {...register(`installments.${index}.value`)}
-                            />
-                          </td>
-                          <td className="border p-2">
-                            <input
-                              type="number"
-                              className="border p-1 w-full"
-                              {...register(`installments.${index}.amount`, { valueAsNumber: true })}
-                            />
-                          </td>
-                          <td className="border p-2">
-                            <input
-                              type="text"
-                              className="border p-1 w-full"
-                              {...register(`installments.${index}.percentage`)}
-                            />
-                          </td>
-                          <td className="border p-2">
-                            <input
-                              type="date"
-                              className="border p-1 w-full"
-                              {...register(`installments.${index}.paymentDate`)}
-                            />
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-
-                  <div className="mt-4 flex gap-4">
-                    <Button type="button" onClick={handleDeleteSelected} disabled={selectedRows.length === 0}>
-                      Excluir Selecionados
-                    </Button>
-                    <Button type="submit">Salvar</Button>
-                  </div>
-                </form>
               </div>
+              <table className="w-full border-collapse border border-gray-300">
+                <thead>
+                  <tr className="bg-gray-200">
+                    <th className="border p-2">
+                      <input
+                        type="checkbox"
+                        checked={selectAll}
+                        onChange={toggleSelectAll}
+                      />
+                    </th>
+                    <th className="border p-2">Condição</th>
+                    <th className="border p-2">Valor</th>
+                    <th className="border p-2">Qnt. de Parcelas</th>
+                    <th className="border p-2">Percentual</th>
+                    <th className="border p-2">Data</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {fields.map((item, index) => (
+                    <tr key={item.id} className="border">
+                      <td className="border p-2 text-center">
+                        <input
+                          type="checkbox"
+                          checked={selectedRows.includes(index)}
+                          onChange={() => toggleRowSelection(index)}
+                        />
+                      </td>
+                      <td className="border p-2">
+                        <select className="border p-1 w-full" {...register(`installments.${index}.type`)}>
+                          <option value="">Selecione</option>
+                          <option value="Sinal">Sinal</option>
+                          <option value="Parcela única">Parcela única</option>
+                          <option value="Mensais">Mensais</option>
+                          <option value="Financiamento">Financiamento</option>
+                        </select>
+                      </td>
+                      <td className="border p-2">
+                        <input
+                          type="text"
+                          className="border p-1 w-full"
+                          {...register(`installments.${index}.value`)}
+                        />
+                      </td>
+                      <td className="border p-2">
+                        <input
+                          type="number"
+                          className="border p-1 w-full"
+                          {...register(`installments.${index}.amount`, { valueAsNumber: true })}
+                        />
+                      </td>
+                      <td className="border p-2">
+                        <input
+                          type="text"
+                          className="border p-1 w-full"
+                          {...register(`installments.${index}.percentage`)}
+                        />
+                      </td>
+                      <td className="border p-2">
+                        <input
+                          type="date"
+                          className="border p-1 w-full"
+                          {...register(`installments.${index}.paymentDate`)}
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              <div className="mt-4 flex gap-4">
+                <Button type="button" onClick={handleDeleteSelected} disabled={selectedRows.length === 0}>
+                  Excluir Selecionados
+                </Button>
+                <Button type="submit">Salvar</Button>
+              </div>
+
+
             </motion.div>
           )}
           {currentStep === 4 && (
