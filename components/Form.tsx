@@ -13,6 +13,7 @@ import { GetOpportunities } from "@/lib/requests"
 import { GetContacts } from "@/lib/requests"
 
 
+
 type Inputs = z.infer<typeof FormDataSchema>
 
 const steps = [
@@ -32,13 +33,13 @@ const steps = [
     id: 'Step 3',
     name: 'Address',
     fields: ['country', 'state', 'city', 'street', 'zip'],
-    subTitle: 'Confira os dados do cônjuge'
+    subTitle: 'Confira os dados do Empreendimento'
   },
   {
     id: 'Step 4',
     name: 'ddress',
     fields: ['country', 'state', 'city', 'street', 'zip'],
-    subTitle: 'Confira os dados do cônjuge'
+    subTitle: 'Insira os dados de parcelamento '
   },
   { id: 'Step 5', name: 'Complete' }
 ]
@@ -47,9 +48,9 @@ const steps = [
 
 
 export default function Form() {
-  const teste = process.env.HOMIO_API_MIVITA_BASE_URL
   const [previousStep, setPreviousStep] = useState(0)
   const [currentStep, setCurrentStep] = useState(0)
+  const [conctactDataOpacity, setConctactDataOpacity] = useState(0);
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
   const [selectAll, setSelectAll] = useState<boolean>(false);
   const delta = currentStep - previousStep
@@ -163,8 +164,10 @@ export default function Form() {
   return (
     <>
       <section className='flex flex-col justify-between mt-6 ml-6 max-w-7xl'>
+        <h1 className='text-gray-900 text-3xl'>Criar nova proposta</h1>
+        <p className='text-gray-600 font-normal'>{steps[currentStep].subTitle}</p>
         {/* steps */}
-        <nav aria-label='Progress'>
+        <nav aria-label='Progress' className='mt-8'>
           <ol role='list' className='space-y-4 md:flex md:space-x-8 md:space-y-0'>
             {steps.map((step, index) => (
               <li key={step.name} className='md:flex-1'>
@@ -223,11 +226,13 @@ export default function Form() {
                       autoComplete='given-name'
                       className='block w-full bg-transparent p-1.5 pl-3 placeholder:gray-200 font-medium focus:bg-white !outline-none sm:text-sm sm:leading-6'
                     />
+
                     <button type='button'
                       onClick={updateInformations}
                       className='p-1.5'>
 
                       <Search className='text-blue-300 p-1' />
+
                     </button>
                     {errors.opportunityId?.message && (
                       <p className='text-sm font-medium text-red-400 absolute mt-11'>
@@ -262,7 +267,7 @@ export default function Form() {
                   </div>
                 </div>
 
-                <div className='sm:col-span-4'>
+                <div className={`sm:col-span-4 opacity-${conctactDataOpacity}`}>
                   <label
                     htmlFor='name'
                     className='block text-sm font-bold leading-6 text-gray-900'
@@ -285,7 +290,7 @@ export default function Form() {
                     )}
                   </div>
                 </div>
-                <div className='sm:col-span-2'>
+                <div className={`sm:col-span-2 opacity-${conctactDataOpacity}`}>
                   <label
                     htmlFor='cpf'
                     className='block text-sm font-bold leading-6 text-gray-900'
@@ -308,7 +313,8 @@ export default function Form() {
                     )}
                   </div>
                 </div>
-                <div className='sm:col-span-2'>
+                <div className={`sm:col-span-2 opacity-${conctactDataOpacity}`}>
+
                   <label
                     htmlFor='rg'
                     className='block text-sm font-bold leading-6 text-gray-900'
@@ -331,7 +337,7 @@ export default function Form() {
                     )}
                   </div>
                 </div>
-                <div className='sm:col-span-4'>
+                <div className={`sm:col-span-4 opacity-${conctactDataOpacity}`}>
                   <label
                     htmlFor='nationality'
                     className='block text-sm font-bold leading-6 text-gray-900'
@@ -916,11 +922,6 @@ export default function Form() {
                        focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
                        placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
                     />
-                    {errors.reservedUntill?.message && (
-                      <p className='mt-2 text-sm font-medium text-red-400'>
-                        {errors.reservedUntill.message}
-                      </p>
-                    )}
                   </div>
 
                 </div>
@@ -943,11 +944,6 @@ export default function Form() {
                     >
 
                     </textarea>
-                    {errors.observations?.message && (
-                      <p className='mt-2 text-sm font-medium text-red-400'>
-                        {errors.observations.message}
-                      </p>
-                    )}
                   </div>
 
                 </div>
@@ -993,72 +989,92 @@ export default function Form() {
                 <Button
                   type="button"
                   onClick={() => append({ type: "Sinal", value: "", amount: 1, percentage: "100%", paymentDate: "" })}
-                  className="m-2.5 bg-indigo-500 hover:bg-indigo-600 text-md"
+                  className="m-4 bg-indigo-500 hover:bg-indigo-600 text-md"
                 >
                   + Nova Parcela
                 </Button>
               </div>
-              <table className="w-full border-collapse border border-gray-300">
+              <table className="w-full">
                 <thead>
-                  <tr className="bg-gray-200">
-                    <th className="border p-2">
+                  <tr className="bg-gray-0 border-y border-gray-50 text-left">
+                    <th className="p-2 font-medium font-sans uppercase text-gray-500">
                       <input
                         type="checkbox"
                         checked={selectAll}
                         onChange={toggleSelectAll}
+                        className='mr-12 ml-4 p-12 scale-125 border border-gray-700'
                       />
                     </th>
-                    <th className="border p-2">Condição</th>
-                    <th className="border p-2">Valor</th>
-                    <th className="border p-2">Qnt. de Parcelas</th>
-                    <th className="border p-2">Percentual</th>
-                    <th className="border p-2">Data</th>
+                    <th className="p-2 font-medium font-sans uppercase text-gray-500">Condição</th>
+                    <th className="p-2 font-medium font-sans uppercase  text-gray-500">Valor</th>
+                    <th className="p-2 font-medium font-sans uppercase  text-gray-500">Qnt. de Parcelas</th>
+                    <th className="p-2 font-medium font-sans uppercase  text-gray-500">Percentual</th>
+                    <th className="p-2 font-medium font-sans uppercase  text-gray-500">Data</th>
                   </tr>
                 </thead>
                 <tbody>
                   {fields.map((item, index) => (
-                    <tr key={item.id} className="border">
-                      <td className="border p-2 text-center">
+                    <tr key={item.id} className="border-b border-gray-50">
+                      <td className="p-2 text-center">
                         <input
                           type="checkbox"
                           checked={selectedRows.includes(index)}
                           onChange={() => toggleRowSelection(index)}
+                          className='mr-12 ml-4 scale-125 border border-gray-700'
                         />
                       </td>
-                      <td className="border p-2">
-                        <select className="border p-1 w-full" {...register(`installments.${index}.type`)}>
-                          <option value="">Selecione</option>
-                          <option value="Sinal">Sinal</option>
-                          <option value="Parcela única">Parcela única</option>
-                          <option value="Mensais">Mensais</option>
-                          <option value="Financiamento">Financiamento</option>
+                      <td className="py-4">
+                        <select className="w-full p-4 bg-gray-50 max-w-max appearance-none rounded-md text-gray-800 font-semibold" {...register(`installments.${index}.type`)}>
+
+                          <option className='text-gray-800 font-semibold' value="Sinal">Sinal</option>
+                          <option className='text-gray-800 font-semibold' value="Parcela única">Parcela única</option>
+                          <option className='text-gray-800 font-semibold' value="Mensais">Mensais</option>
+                          <option className='text-gray-800 font-semibold' value="Intermediárias">Intermediárias</option>
+                          <option className='text-gray-800 font-semibold' value="Anuais">Anuais</option>
+                          <option className='text-gray-800 font-semibold' value="30 dias">30 dias</option>
+                          <option className='text-gray-800 font-semibold' value="60 dias">60 dias</option>
+                          <option className='text-gray-800 font-semibold' value="Contrato">Especial</option>
+                          <option className='text-gray-800 font-semibold' value="90 dias">90 dias</option>
+                          <option className='text-gray-800 font-semibold' value="120 dias">120 dias</option>
+                          <option className='text-gray-800 font-semibold' value="Despesa nacompra (30 ?)">Despesa na compra (30 ?)</option>
+                          <option className='text-gray-800 font-semibold' value="Despesa na compra (60 ?)">Despesa na compra (60 ?)</option>
+                          <option className='text-gray-800 font-semibold' value="Bimestrais">Bimestrais</option>
+                          <option className='text-gray-800 font-semibold' value="Trimestrais">Trimestrais</option>
+                          <option className='text-gray-800 font-semibold' value="Comissão Apartada">Comissão Apartada</option>
+                          <option className='text-gray-800 font-semibold' value="Permuta">Permuta</option>
+                          <option className='text-gray-800 font-semibold' value="Chaves"> Chaves</option>
                         </select>
                       </td>
-                      <td className="border p-2">
-                        <input
-                          type="text"
-                          className="border p-1 w-full"
-                          {...register(`installments.${index}.value`)}
-                        />
+                      <td className="text-gray-300 font-normal p-2">
+                        <div className='flex content-center font-semibold text-gray-300'>
+                          <p>
+                            R$
+                          </p>
+                          <input
+                            type="text"
+                            className=" font-semibold p-1 w-full"
+                            {...register(`installments.${index}.value`)}
+                          />
+                        </div>
                       </td>
-                      <td className="border p-2">
+                      <td className="p-2">
                         <input
                           type="number"
-                          className="border p-1 w-full"
+                          className="text-gray-300 font-semibold p-1 w-full"
                           {...register(`installments.${index}.amount`, { valueAsNumber: true })}
                         />
                       </td>
-                      <td className="border p-2">
+                      <td className=" p-2">
                         <input
                           type="text"
-                          className="border p-1 w-full"
+                          className=" p-1 w-full"
                           {...register(`installments.${index}.percentage`)}
                         />
                       </td>
-                      <td className="border p-2">
+                      <td className=" p-2">
                         <input
                           type="date"
-                          className="border p-1 w-full"
+                          className=" p-1 w-full"
                           {...register(`installments.${index}.paymentDate`)}
                         />
                       </td>
@@ -1071,7 +1087,6 @@ export default function Form() {
                 <Button type="button" onClick={handleDeleteSelected} disabled={selectedRows.length === 0}>
                   Excluir Selecionados
                 </Button>
-                <Button type="submit">Salvar</Button>
               </div>
 
 
@@ -1113,7 +1128,7 @@ export default function Form() {
             </button>
           </div>
         </div>
-      </section>
+      </section >
     </>
   )
 }
