@@ -9,6 +9,8 @@ import { FormDataSchema } from '@/types/formSchema'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm, SubmitHandler, useFieldArray,  useWatch } from 'react-hook-form'
 import { Button } from "@/components/ui/button";
+import { GetOpportunities } from "@/lib/requests"
+import { GetContacts } from "@/lib/requests"
 
 
 type Inputs = z.infer<typeof FormDataSchema>
@@ -59,6 +61,7 @@ export default function Form() {
     trigger,
     control,
     watch,
+    setValue,
     formState: { errors }
   } = useForm<Inputs>({
     resolver: zodResolver(FormDataSchema)
@@ -119,6 +122,43 @@ export default function Form() {
     setSelectedRows([]);
     setSelectAll(false);
   };
+
+  async function updateInformations() {
+    const opportunityId = watch('opportunityId')
+    const opportunities = await GetOpportunities(opportunityId)
+    const opportunity = opportunities?.opportunities[0]
+    console.log(opportunity)
+    console.log(opportunity?.name)
+    if (!opportunity) {
+      return;
+    }
+    // const contactId = opportunity.contactId
+    const contacts = await GetContacts('nKdmcdECKOrQAHK3nS5a')
+    const contact = contacts.contact
+    console.log(contact)
+    setValue('name', contact?.firstName + ' ' + contact?.lastName)
+    setValue('birthDate', contact?.dateOfBirth)
+    setValue('email', contact?.email)
+    setValue('phone', contact?.phone)
+    setValue('address', contact?.address1 + contact?.customFields.find(item => item.id === 'K8u7EgoKjMRZdq8Mnhku')?.value || '')
+    setValue('zipCode', contact?.postalCode)
+    setValue('city', contact?.city)
+    setValue('state', contact?.state)
+    let cpf = contact?.customFields.find(item => item.id === 'Z6NSHw77VAORaZKcAQr9')?.value
+    if (cpf && /^\d{11}$/.test(cpf)) {
+      cpf = cpf.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4');
+    } 
+    setValue('cpf', cpf || '')
+    setValue('rg', contact?.customFields.find(item => item.id === 'JZZb9gPOSISid1vp3rHh')?.value || '')
+    setValue('nationality', contact?.customFields.find(item => item.id === '1Xj4odQLI2L5FsXT5jmO')?.value || '')
+    const maritalStatus = contact?.customFields.find(item => item.id === 'a5b5vH65cVyb9QxUF5ef')?.value
+    console.log(maritalStatus)
+    if(maritalStatus != 'Solteiro(a)' && maritalStatus != 'Casado(a)' && maritalStatus != 'Separado(a)' && maritalStatus != 'Divorciado(a)' && maritalStatus != 'Viúvo(a)' && maritalStatus != 'União Estável'){}
+    else {
+      setValue('maritalStatus', maritalStatus)
+    }
+    setValue('neighborhood', contact?.customFields.find(item => item.id === 'BppzAoRqxsTWpdFcJwam')?.value || '')
+  }
 
   return (
     <>
@@ -184,6 +224,7 @@ export default function Form() {
                       className='block w-full bg-transparent p-1.5 pl-3 placeholder:gray-200 font-medium focus:bg-white !outline-none sm:text-sm sm:leading-6'
                     />
                     <button type='button'
+                      onClick={updateInformations}
                       className='p-1.5'>
 
                       <Search className='text-blue-300 p-1' />
@@ -447,7 +488,7 @@ export default function Form() {
                   <div className='block'>
                     <input
                       id='zipCode'
-                      type='text'
+                      type='string'
                       {...register('zipCode')}
                       className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
                        focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
