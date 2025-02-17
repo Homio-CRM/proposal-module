@@ -9,7 +9,7 @@ export const FormDataSchema = z.object({
   phone: z.string().min(7, 'Telefone é obrigatório'),
   email: z.string().min(1, 'Email é obrigatório').email('Endereço de email inválido'),
   nationality: z.string().min(1, 'Nacionalidade é obrigatório'),
-  maritalStatus: z.enum(['Casado', 'Solteiro'], { message: 'Estado civíl inválido' }),
+  maritalStatus: z.enum(['Casado', 'Solteiro', 'Separado judicialmente', 'Divorciado', 'Viúvo'], { message: 'Estado civíl inválido' }),
   birthDate: z.string().min(7, 'Data de Nascimento é obrigatório'),
   address: z.string().min(7, 'Endereço é obrigatório'),
   zipCode: z.string().min(8, 'Cep é Obrigatório'),
