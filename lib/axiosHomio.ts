@@ -9,14 +9,14 @@ const homio = axios.create({
   }
 });
 
-const mivita = axios.create({
-  baseURL: process.env.HOMIO_API_MIVITA_BASE_URL,
-  timeout: 10000,
-  headers: {
-    "Content-Type": "application/json",
-    Accept: "application/json",
-  }
-});
+// // const mivita = axios.create({
+// //   baseURL: process.env.HOMIO_API_MIVITA_BASE_URL,
+// //   timeout: 10000,
+// //   headers: {
+// //     "Content-Type": "application/json",
+// //     Accept: "application/json",
+// //   }
+// });
 
 // homio.interceptors.response.use(
 //     (response) => response,

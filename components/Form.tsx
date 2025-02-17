@@ -1,12 +1,13 @@
 'use client'
 
+import React from 'react'
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Search } from 'lucide-react'
 import { z } from 'zod'
 import { FormDataSchema } from '@/types/formSchema'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm, SubmitHandler, useFieldArray } from 'react-hook-form'
+import { useForm, SubmitHandler, useFieldArray,  useWatch } from 'react-hook-form'
 import { Button } from "@/components/ui/button";
 import Image from 'next/image'
 
@@ -41,6 +42,9 @@ const steps = [
   { id: 'Step 5', name: 'Complete' }
 ]
 
+
+
+
 export default function Form() {
   const [previousStep, setPreviousStep] = useState(0)
   const [currentStep, setCurrentStep] = useState(0)
@@ -55,6 +59,7 @@ export default function Form() {
     reset,
     trigger,
     control,
+    watch,
     formState: { errors }
   } = useForm<Inputs>({
     resolver: zodResolver(FormDataSchema)
@@ -69,8 +74,6 @@ export default function Form() {
     console.log(data)
     reset()
   }
-
-  type FieldName = keyof Inputs
 
   const next = async () => {
     const fields = steps[currentStep].fields
@@ -93,6 +96,7 @@ export default function Form() {
       setCurrentStep(step => step - 1)
     }
   }
+
 
   const toggleSelectAll = () => {
     if (selectAll) {
@@ -187,6 +191,7 @@ export default function Form() {
                         setConctactDataOpacity(100)
                       }}
                     >
+
                       <Search className='text-blue-300 p-1' />
 
                     </button>
