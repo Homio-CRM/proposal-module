@@ -34,13 +34,13 @@ const steps = [
     id: 'Passo 3',
     name: 'Empreendimento',
     fields: ['building', 'apartmentUnity', 'floor', 'tower', 'vendor', 'reserved', 'observations', 'contractDate'],
-    subTitle: 'Confira os dados do cônjuge'
+    subTitle: 'Confira os dados do empreendimento'
   },
   {
     id: 'Passo 4',
     name: 'Parcelas',
     fields: ['installments'],
-    subTitle: 'Confira os dados do cônjuge'
+    subTitle: 'Confira as parcelas'
   },
   { id: 'Passo 5', name: 'Complete' }
 ]
@@ -131,7 +131,7 @@ export default function Form() {
     const opportunity = await GetOpportunities(opportunityId)
     if (!opportunity) return;
     const contactId = opportunity.contactId
-    const contact = await GetContacts(contactId)
+    const contact = await GetContacts('F38opVNCOgBwGNzqp773')
     updateLabels(contact, opportunity)
   }
 
@@ -390,14 +390,20 @@ export default function Form() {
                     Estado Civil
                   </label>
                   <div className='mt-2'>
-                    <input
+                  <select
                       id='maritalStatus'
-                      type='text'
                       {...register('maritalStatus')}
-                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                      className='px-3 w-full rounded-md border-0 py-2.5 bg-gray-0 text-gray-900 shadow-sm ring-1
                        focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
                        placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
-                    />
+                    >
+                      <option value="Solteiro(a)">Solteiro(a)</option>
+                      <option value="Casado(a)">Casado(a)</option>
+                      <option value="Separado(a)">Separado(a)</option>
+                      <option value="Divorciado(a)">Divorciado(a)</option>
+                      <option value="Viúvo(a)">Viúvo(a)</option>
+                      <option value="União Estável">União Estável</option>
+                    </select>
                     {errors.maritalStatus?.message && (
                       <p className='mt-2 text-sm font-medium text-red-400'>
                         {errors.maritalStatus.message}
