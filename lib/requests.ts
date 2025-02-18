@@ -6,7 +6,7 @@ export async function GetOpportunities(id: string): Promise<Opportunity | undefi
   try {
     const USERNAME = process.env.NEXT_PUBLIC_HOMIO_API_MIVITA_USER;
     const PASSWORD = process.env.NEXT_PUBLIC_HOMIO_API_MIVITA_PASS;
-    const response = await mivita.get<Opportunity>(
+    const response = await mivita.get(
       `opportunities/?id=${id}`,
       {
         headers: {
@@ -14,7 +14,7 @@ export async function GetOpportunities(id: string): Promise<Opportunity | undefi
         },
       }
     );
-    return response.data;
+    return response.data.opportunities[0];
   } catch (error) {
     console.error("Erro ao obter as oportinidades", error);
     // throw new Error("Falha ao obter as oportunidades.");
@@ -30,7 +30,7 @@ export async function GetContacts(ContactId: string): Promise<Contact> {
       pageLimit: 1,
       page: 1
     };
-    const response = await mivita.get<Contact>(
+    const response = await mivita.get(
       "/contacts/?id=" + ContactId,
       {
         headers: {
@@ -39,7 +39,7 @@ export async function GetContacts(ContactId: string): Promise<Contact> {
         data: body
       }
     );
-    return response.data;
+    return response.data.contact;
   } catch (error) {
     console.error("Erro ao obter os contatos", error);
     throw new Error("Falha ao obter os contatos.");
