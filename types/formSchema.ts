@@ -29,8 +29,8 @@ export const FormDataSchema = z.object({
   floor: z.string().min(1, 'Pavimento é obrigatório'),
   tower: z.string().min(1, 'Torre é obrigatório'),
   vendor: z.string().min(1, 'Responsável é obrigatório'),
-  reservedUntill: z.string(),
-  observations: z.string(),
+  reservedUntill: z.string().optional(),
+  observations: z.string().optional(),
   contractDate: z.string().min(7, 'Data do contrato é obrigatório'),
   installments: z.array(z.object({
     type: z.enum(['Sinal', 'Parcela única', 'Mensais', 'Intermediárias', 'Anuais',

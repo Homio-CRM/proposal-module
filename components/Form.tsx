@@ -7,7 +7,7 @@ import { Search } from 'lucide-react'
 import { z } from 'zod'
 import { FormDataSchema } from '@/types/formSchema'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm, SubmitHandler, useFieldArray,  useWatch } from 'react-hook-form'
+import { useForm, SubmitHandler, useFieldArray } from 'react-hook-form'
 import { Button } from "@/components/ui/button";
 import { GetOpportunities } from "@/lib/requests"
 import { GetContacts } from "@/lib/requests"
@@ -50,7 +50,6 @@ const steps = [
 export default function Form() {
   const [previousStep, setPreviousStep] = useState(0)
   const [currentStep, setCurrentStep] = useState(0)
-  const [conctactDataOpacity, setConctactDataOpacity] = useState(0);
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
   const [selectAll, setSelectAll] = useState<boolean>(false);
   const delta = currentStep - previousStep
@@ -65,7 +64,8 @@ export default function Form() {
     setValue,
     formState: { errors }
   } = useForm<Inputs>({
-    resolver: zodResolver(FormDataSchema)
+    resolver: zodResolver(FormDataSchema),
+
   })
 
   const { fields, append, remove } = useFieldArray({
@@ -78,9 +78,10 @@ export default function Form() {
     reset()
   }
 
+  type fieldName = keyof Inputs
   const next = async () => {
     const fields = steps[currentStep].fields
-    const output = await trigger(fields as FieldName[], { shouldFocus: true })
+    const output = await trigger(fields as fieldName[], { shouldFocus: true })
 
     if (!output) return
 
@@ -148,13 +149,13 @@ export default function Form() {
     let cpf = contact?.customFields.find(item => item.id === 'Z6NSHw77VAORaZKcAQr9')?.value
     if (cpf && /^\d{11}$/.test(cpf)) {
       cpf = cpf.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4');
-    } 
+    }
     setValue('cpf', cpf || '')
     setValue('rg', contact?.customFields.find(item => item.id === 'JZZb9gPOSISid1vp3rHh')?.value || '')
     setValue('nationality', contact?.customFields.find(item => item.id === '1Xj4odQLI2L5FsXT5jmO')?.value || '')
     const maritalStatus = contact?.customFields.find(item => item.id === 'a5b5vH65cVyb9QxUF5ef')?.value
     console.log(maritalStatus)
-    if(maritalStatus != 'Solteiro(a)' && maritalStatus != 'Casado(a)' && maritalStatus != 'Separado(a)' && maritalStatus != 'Divorciado(a)' && maritalStatus != 'Viúvo(a)' && maritalStatus != 'União Estável'){}
+    if (maritalStatus != 'Solteiro(a)' && maritalStatus != 'Casado(a)' && maritalStatus != 'Separado(a)' && maritalStatus != 'Divorciado(a)' && maritalStatus != 'Viúvo(a)' && maritalStatus != 'União Estável') { }
     else {
       setValue('maritalStatus', maritalStatus)
     }
@@ -267,7 +268,7 @@ export default function Form() {
                   </div>
                 </div>
 
-                <div className={`sm:col-span-4 opacity-${conctactDataOpacity}`}>
+                <div className={`sm:col-span-4`}>
                   <label
                     htmlFor='name'
                     className='block text-sm font-bold leading-6 text-gray-900'
@@ -290,7 +291,7 @@ export default function Form() {
                     )}
                   </div>
                 </div>
-                <div className={`sm:col-span-2 opacity-${conctactDataOpacity}`}>
+                <div className={`sm:col-span-2`}>
                   <label
                     htmlFor='cpf'
                     className='block text-sm font-bold leading-6 text-gray-900'
@@ -313,7 +314,7 @@ export default function Form() {
                     )}
                   </div>
                 </div>
-                <div className={`sm:col-span-2 opacity-${conctactDataOpacity}`}>
+                <div className={'sm:col-span-2'}>
 
                   <label
                     htmlFor='rg'
@@ -337,7 +338,7 @@ export default function Form() {
                     )}
                   </div>
                 </div>
-                <div className={`sm:col-span-4 opacity-${conctactDataOpacity}`}>
+                <div className='sm:col-span-4'>
                   <label
                     htmlFor='nationality'
                     className='block text-sm font-bold leading-6 text-gray-900'
@@ -354,7 +355,7 @@ export default function Form() {
                        placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
                     />
                     {errors.nationality?.message && (
-                      <p className='mt-2 text-sm font-medium text-red-400'>
+                      <p className='mt-2 font-medium text-sm text-red-400'>
                         {errors.nationality.message}
                       </p>
                     )}
@@ -425,9 +426,9 @@ export default function Form() {
                        focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
                        placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
                     />
-                    {errors.birthDate?.message && (
+                    {errors.email?.message && (
                       <p className='mt-2 text-sm font-medium text-red-400'>
-                        {errors.birthDate.message}
+                        {errors.email.message}
                       </p>
                     )}
                   </div>
@@ -1005,11 +1006,11 @@ export default function Form() {
                         className='mr-12 ml-4 p-12 scale-125 border border-gray-700'
                       />
                     </th>
-                    <th className="p-2 font-medium font-sans uppercase text-gray-500">Condição</th>
-                    <th className="p-2 font-medium font-sans uppercase  text-gray-500">Valor</th>
-                    <th className="p-2 font-medium font-sans uppercase  text-gray-500">Qnt. de Parcelas</th>
-                    <th className="p-2 font-medium font-sans uppercase  text-gray-500">Percentual</th>
-                    <th className="p-2 font-medium font-sans uppercase  text-gray-500">Data</th>
+                    <th className="p-2 text-sm font-bold font-sans uppercase text-gray-500">Condição</th>
+                    <th className="p-2 text-sm font-bold font-sans uppercase  text-gray-500">Valor</th>
+                    <th className="p-2 text-sm font-bold font-sans uppercase  text-gray-500">Qnt. de Parcelas</th>
+                    <th className="p-2 text-sm font-bold font-sans uppercase  text-gray-500">Percentual</th>
+                    <th className="p-2 text-sm font-bold font-sans uppercase  text-gray-500">Data</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1045,14 +1046,14 @@ export default function Form() {
                           <option className='text-gray-800 font-semibold' value="Chaves"> Chaves</option>
                         </select>
                       </td>
-                      <td className="text-gray-300 font-normal p-2">
-                        <div className='flex content-center font-semibold text-gray-300'>
-                          <p>
+                      <td className="text-gray-500 font-normal p-2">
+                        <div className='flex content-center font-normal text-lg'>
+                          <p className='text-gray-900 p-1 font-medium'>
                             R$
                           </p>
                           <input
                             type="text"
-                            className=" font-semibold p-1 w-full"
+                            className=" font-normal p-1 w-full"
                             {...register(`installments.${index}.value`)}
                           />
                         </div>
@@ -1060,21 +1061,26 @@ export default function Form() {
                       <td className="p-2">
                         <input
                           type="number"
-                          className="text-gray-300 font-semibold p-1 w-full"
+                          className="text-gray-600 font-normal p-1 w-full"
                           {...register(`installments.${index}.amount`, { valueAsNumber: true })}
                         />
                       </td>
                       <td className=" p-2">
-                        <input
-                          type="text"
-                          className=" p-1 w-full"
-                          {...register(`installments.${index}.percentage`)}
-                        />
+                        <div className='flex content-center font-normal text-lg'>
+                          <input
+                            type="number"
+                            className="p-1 w-14  text-gray-600 font-normal"
+                            {...register(`installments.${index}.percentage`)}
+                          />
+                          <p className='text-gray-900 p-1 font-medium'>
+                            %
+                          </p>
+                        </div>
                       </td>
-                      <td className=" p-2">
+                      <td className="p-2">
                         <input
                           type="date"
-                          className=" p-1 w-full"
+                          className=" p-1 w-full  text-gray-600 font-normal text-lg"
                           {...register(`installments.${index}.paymentDate`)}
                         />
                       </td>
