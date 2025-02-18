@@ -131,7 +131,7 @@ export default function Form() {
     const opportunity = await GetOpportunities(opportunityId)
     if (!opportunity) return;
     const contactId = opportunity.contactId
-    const contact = await GetContacts('F38opVNCOgBwGNzqp773')
+    const contact = await GetContacts(contactId)
     updateLabels(contact, opportunity)
   }
 
@@ -149,7 +149,14 @@ export default function Form() {
       cpf: CheckCpf(contact.customFields.find(item => item.id === 'Z6NSHw77VAORaZKcAQr9')?.value as string),
       rg: contact.customFields.find(item => item.id === 'JZZb9gPOSISid1vp3rHh')?.value,
       nationality: contact.customFields.find(item => item.id === '1Xj4odQLI2L5FsXT5jmO')?.value,
-      maritalStatus: contact?.customFields.find(item => item.id === 'a5b5vH65cVyb9QxUF5ef')?.value,
+      maritalStatus: contact?.customFields.find(item => item.id === 'a5b5vH65cVyb9QxUF5ef')?.value as 
+      | "Solteiro(a)"
+      | "Casado(a)"
+      | "Separado(a)"
+      | "Divorciado(a)"
+      | "Viúvo(a)"
+      | "União Estável"
+      | undefined,
       birthDate: contact.dateOfBirth,
       email: contact.email,
       phone: contact.phone,
