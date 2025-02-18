@@ -1,6 +1,9 @@
 export type Opportunity = {
-    opportunities: {
-      contactId: string;
-      name: string;
+    contactId: string;
+    name: string;
+    customFields: {
+      id: string;
+      fieldValueString: string;
+      fieldValueArray: string[];
     }[];
   };

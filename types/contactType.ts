@@ -1,5 +1,4 @@
 export type Contact = {
-  contact: {
     firstName: string;
     lastName: string;
     email: string;
@@ -13,5 +12,4 @@ export type Contact = {
       id: string;
       value: string;
     }[];
-  }
 };

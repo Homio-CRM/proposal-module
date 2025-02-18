@@ -7,47 +7,48 @@ import { Search } from 'lucide-react'
 import { z } from 'zod'
 import { FormDataSchema } from '@/types/formSchema'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm, SubmitHandler, useFieldArray,  useWatch } from 'react-hook-form'
+import { useForm, SubmitHandler, useFieldArray } from 'react-hook-form'
 import { Button } from "@/components/ui/button";
 import { GetOpportunities } from "@/lib/requests"
 import { GetContacts } from "@/lib/requests"
+import { Contact } from '@/types/contactType'
+import { Opportunity } from '@/types/opportunityType'
 
 
 type Inputs = z.infer<typeof FormDataSchema>
 
 const steps = [
   {
-    id: 'Step 1',
+    id: 'Passo 1',
     name: 'Personal Information',
-    fields: ['oppportunityId', 'proposalDate', 'name', 'cpf', 'rg'],
+    fields: ['oppportunityId', 'proposalDate', 'name', 'cpf', 'rg', 'nationality', 'maritalStatus', 'birthDate', 'email', 'phone', 'address', 'zipCode', 'city', 'neighborhood', 'state'],
     subTitle: 'Preencha o ID da oportunidade  para criar a sua proposta.'
   },
   {
-    id: 'Step 2',
-    name: 'Con',
-    fields: ['country', 'state', 'city', 'street', 'zip'],
+    id: 'Passo 2',
+    name: 'Cônjuge',
+    fields: ['spouseName', 'spouseCpf', 'spouseRg', 'spouseNationality', 'spouseOccupation', 'spouseEmail', 'spousePhone'],
     subTitle: 'Confira os dados do cônjuge'
   },
   {
-    id: 'Step 3',
-    name: 'Address',
-    fields: ['country', 'state', 'city', 'street', 'zip'],
+    id: 'Passo 3',
+    name: 'Empreendimento',
+    fields: ['building', 'apartmentUnity', 'floor', 'tower', 'vendor', 'reserved', 'observations', 'contractDate'],
     subTitle: 'Confira os dados do cônjuge'
   },
   {
-    id: 'Step 4',
-    name: 'ddress',
-    fields: ['country', 'state', 'city', 'street', 'zip'],
+    id: 'Passo 4',
+    name: 'Parcelas',
+    fields: ['installments'],
     subTitle: 'Confira os dados do cônjuge'
   },
-  { id: 'Step 5', name: 'Complete' }
+  { id: 'Passo 5', name: 'Complete' }
 ]
 
 
 
 
 export default function Form() {
-  const teste = process.env.HOMIO_API_MIVITA_BASE_URL
   const [previousStep, setPreviousStep] = useState(0)
   const [currentStep, setCurrentStep] = useState(0)
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
@@ -61,7 +62,6 @@ export default function Form() {
     trigger,
     control,
     watch,
-    setValue,
     formState: { errors }
   } = useForm<Inputs>({
     resolver: zodResolver(FormDataSchema)
@@ -76,6 +76,8 @@ export default function Form() {
     console.log(data)
     reset()
   }
+
+  type FieldName = keyof Inputs
 
   const next = async () => {
     const fields = steps[currentStep].fields
@@ -125,39 +127,58 @@ export default function Form() {
 
   async function updateInformations() {
     const opportunityId = watch('opportunityId')
-    const opportunities = await GetOpportunities(opportunityId)
-    const opportunity = opportunities?.opportunities[0]
-    console.log(opportunity)
-    console.log(opportunity?.name)
-    if (!opportunity) {
-      return;
-    }
-    // const contactId = opportunity.contactId
-    const contacts = await GetContacts('nKdmcdECKOrQAHK3nS5a')
-    const contact = contacts.contact
-    console.log(contact)
-    setValue('name', contact?.firstName + ' ' + contact?.lastName)
-    setValue('birthDate', contact?.dateOfBirth)
-    setValue('email', contact?.email)
-    setValue('phone', contact?.phone)
-    setValue('address', contact?.address1 + contact?.customFields.find(item => item.id === 'K8u7EgoKjMRZdq8Mnhku')?.value || '')
-    setValue('zipCode', contact?.postalCode)
-    setValue('city', contact?.city)
-    setValue('state', contact?.state)
-    let cpf = contact?.customFields.find(item => item.id === 'Z6NSHw77VAORaZKcAQr9')?.value
-    if (cpf && /^\d{11}$/.test(cpf)) {
+    const opportunity = await GetOpportunities(opportunityId)
+    if (!opportunity) return;
+    const contactId = opportunity.contactId
+    const contact = await GetContacts(contactId)
+    updateLabels(contact, opportunity)
+  }
+
+  function CheckCpf(cpf: string): string {
+    if (cpf && /^.{11,14}$/.test(cpf)) {
+      cpf = cpf.replace(/\D/g, '');
       cpf = cpf.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4');
-    } 
-    setValue('cpf', cpf || '')
-    setValue('rg', contact?.customFields.find(item => item.id === 'JZZb9gPOSISid1vp3rHh')?.value || '')
-    setValue('nationality', contact?.customFields.find(item => item.id === '1Xj4odQLI2L5FsXT5jmO')?.value || '')
-    const maritalStatus = contact?.customFields.find(item => item.id === 'a5b5vH65cVyb9QxUF5ef')?.value
-    console.log(maritalStatus)
-    if(maritalStatus != 'Solteiro(a)' && maritalStatus != 'Casado(a)' && maritalStatus != 'Separado(a)' && maritalStatus != 'Divorciado(a)' && maritalStatus != 'Viúvo(a)' && maritalStatus != 'União Estável'){}
-    else {
-      setValue('maritalStatus', maritalStatus)
     }
-    setValue('neighborhood', contact?.customFields.find(item => item.id === 'BppzAoRqxsTWpdFcJwam')?.value || '')
+    return cpf
+  }
+
+  function updateLabels(contact: Contact, opportunity: Opportunity) {
+    reset({
+      name: contact.firstName + ' ' + contact.lastName,
+      cpf: CheckCpf(contact.customFields.find(item => item.id === 'Z6NSHw77VAORaZKcAQr9')?.value as string),
+      rg: contact.customFields.find(item => item.id === 'JZZb9gPOSISid1vp3rHh')?.value,
+      nationality: contact.customFields.find(item => item.id === '1Xj4odQLI2L5FsXT5jmO')?.value,
+      maritalStatus: contact?.customFields.find(item => item.id === 'a5b5vH65cVyb9QxUF5ef')?.value,
+      birthDate: contact.dateOfBirth,
+      email: contact.email,
+      phone: contact.phone,
+      address: contact.address1 + contact?.customFields.find(item => item.id === 'K8u7EgoKjMRZdq8Mnhku')?.value,
+      zipCode: contact.postalCode,
+      city: contact.city,
+      neighborhood: contact.customFields.find(item => item.id === 'BppzAoRqxsTWpdFcJwam')?.value,
+      state: contact.state,
+      spouseName: contact.customFields.find(item => item.id === 'pkKduZf7cQrfaB7At0qO')?.value,
+      spouseCpf: CheckCpf(contact.customFields.find(item => item.id === 'O0n5OIILrSve13ZcFiA0')?.value as string),
+      spouseRg: contact.customFields.find(item => item.id === '2j2YXdg5ND441jRpMohZ')?.value,
+      spouseNationality: contact.customFields.find(item => item.id === 'rUcp7m2vwTP6Rt7d58q4')?.value,
+      spouseOccupation: contact.customFields.find(item => item.id === 'nYaPQ7t2q8gAoelEQq7d')?.value,
+      spouseEmail: contact.customFields.find(item => item.id === 'yYf8GlPPsYiQr0ZVKNNE')?.value,
+      spousePhone: contact.customFields.find(item => item.id === 'hV8KQRdmFjGQuXqPC5Ah')?.value,
+      building: opportunity.customFields.find(item => item.id === 'EVdLCbbyeUrBrMIFmZVX')?.fieldValueArray[0] as 
+      | "Serena By Mivita"
+      | "Lago By Mivita"
+      | "Stage Praia do Canto"
+      | "Next Jardim da Penha"
+      | "Inside Jardim da Penha"
+      | "Quartzo By Mivita"
+      | undefined,
+      apartmentUnity: contact.customFields.find(item => item.id === 'stOGiUa4CDw4mxbo03kU')?.value,
+      floor: contact.customFields.find(item => item.id === '65p4lHnuDMqJFeX2iMBI')?.value,
+      tower: contact.customFields.find(item => item.id === 'CH2ojxtTvuVhbYxzpyME')?.value,
+      vendor: opportunity.customFields.find(item => item.id === 'UxgoVhhSfTrIG9RFaUJ5')?.fieldValueString,
+      reservedUntill: contact.customFields.find(item => item.id === 'jQI7mltRg2JulEJZUYwc')?.value,
+      observations: contact.customFields.find(item => item.id === 'DcFDxA1BhIzMbpedd8Jc')?.value,
+    })
   }
 
   return (
@@ -338,7 +359,7 @@ export default function Form() {
                   >
                     Nacionalidade
                   </label>
-                  <div className='block'>
+                  <div className='mt-2'>
                     <input
                       id='nationality'
                       type='text'
@@ -362,7 +383,7 @@ export default function Form() {
                   >
                     Estado Civil
                   </label>
-                  <div className='block'>
+                  <div className='mt-2'>
                     <input
                       id='maritalStatus'
                       type='text'
@@ -386,7 +407,7 @@ export default function Form() {
                   >
                     Data de Nascimento
                   </label>
-                  <div className='block'>
+                  <div className='mt-2'>
                     <input
                       id='birthDate'
                       type='date'
@@ -410,7 +431,7 @@ export default function Form() {
                   >
                     Email
                   </label>
-                  <div className='block'>
+                  <div className='mt-2'>
                     <input
                       id='email'
                       type='text'
@@ -419,9 +440,9 @@ export default function Form() {
                        focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
                        placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
                     />
-                    {errors.birthDate?.message && (
+                    {errors.email?.message && (
                       <p className='mt-2 text-sm font-medium text-red-400'>
-                        {errors.birthDate.message}
+                        {errors.email.message}
                       </p>
                     )}
                   </div>
@@ -435,7 +456,7 @@ export default function Form() {
                   >
                     Telefone
                   </label>
-                  <div className='block'>
+                  <div className='mt-2'>
                     <input
                       id='phone'
                       type='text'
@@ -460,7 +481,7 @@ export default function Form() {
                   >
                     Endereço
                   </label>
-                  <div className='block'>
+                  <div className='mt-2'>
                     <input
                       id='address'
                       type='text'
@@ -485,10 +506,10 @@ export default function Form() {
                   >
                     CEP
                   </label>
-                  <div className='block'>
+                  <div className='mt-2'>
                     <input
                       id='zipCode'
-                      type='string'
+                      type='text'
                       {...register('zipCode')}
                       className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
                        focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
@@ -510,7 +531,7 @@ export default function Form() {
                   >
                     Cidade
                   </label>
-                  <div className='block'>
+                  <div className='mt-2'>
                     <input
                       id='city'
                       type='text'
@@ -536,7 +557,7 @@ export default function Form() {
                   >
                     Bairro
                   </label>
-                  <div className='block'>
+                  <div className='mt-2'>
                     <input
                       id='neighborhood'
                       type='text'
@@ -562,7 +583,7 @@ export default function Form() {
                   >
                     Estado
                   </label>
-                  <div className='block'>
+                  <div className='mt-2'>
                     <input
                       id='state'
                       type='text'
@@ -598,7 +619,7 @@ export default function Form() {
                   >
                     Cônjuge
                   </label>
-                  <div className='block'>
+                  <div className='mt-2'>
                     <input
                       id='spouseName'
                       type='text'
@@ -622,7 +643,7 @@ export default function Form() {
                   >
                     CPF
                   </label>
-                  <div className='block'>
+                  <div className='mt-2'>
                     <input
                       id='spouseCpf'
                       type='text'
@@ -646,7 +667,7 @@ export default function Form() {
                   >
                     RG
                   </label>
-                  <div className='block'>
+                  <div className='mt-2'>
                     <input
                       id='spouseRg'
                       type='text'
@@ -665,12 +686,12 @@ export default function Form() {
                 </div>
                 <div className='sm:col-span-4'>
                   <label
-                    htmlFor='spouceNationality'
+                    htmlFor='spouseNationality'
                     className='block text-sm font-bold leading-6 text-gray-900'
                   >
                     Nacionalidade
                   </label>
-                  <div className='block'>
+                  <div className='mt-2'>
                     <input
                       id='spouseNationality'
                       type='text'
@@ -689,12 +710,12 @@ export default function Form() {
                 </div>
                 <div className='sm:col-span-4'>
                   <label
-                    htmlFor='spouceOcuppation'
+                    htmlFor='spouseOccupation'
                     className='block text-sm font-bold leading-6 text-gray-900'
                   >
                     Profissão
                   </label>
-                  <div className='block'>
+                  <div className='mt-2'>
                     <input
                       id='spouseOccupation'
                       type='text'
@@ -718,7 +739,7 @@ export default function Form() {
                   >
                     Email
                   </label>
-                  <div className='block'>
+                  <div className='mt-2'>
                     <input
                       id='spouseEmail'
                       type='text'
@@ -742,7 +763,7 @@ export default function Form() {
                   >
                     Telefone
                   </label>
-                  <div className='block'>
+                  <div className='mt-2'>
                     <input
                       id='spousePhone'
                       type='text'
@@ -773,12 +794,12 @@ export default function Form() {
 
                 <div className='sm:col-span-4'>
                   <label
-                    htmlFor='spouseName'
+                    htmlFor='building'
                     className='block text-sm font-bold leading-6 text-gray-900'
                   >
                     Empreendimento
                   </label>
-                  <div className='block'>
+                  <div className='mt-2'>
                     <select
                       id='building'
                       {...register('building')}
@@ -809,7 +830,7 @@ export default function Form() {
                   >
                     Unidade
                   </label>
-                  <div className='block'>
+                  <div className='mt-2'>
                     <input
                       id='apartmentUnity'
                       type='text'
@@ -857,7 +878,7 @@ export default function Form() {
                   >
                     Torre
                   </label>
-                  <div className='block'>
+                  <div className='mt-2'>
                     <input
                       id='tower'
                       type='text'
@@ -882,7 +903,7 @@ export default function Form() {
                   >
                     Responsável
                   </label>
-                  <div className='block'>
+                  <div className='mt-2'>
                     <input
                       id='vendor'
                       type='text'
@@ -907,7 +928,7 @@ export default function Form() {
                   >
                     Reservado até
                   </label>
-                  <div className='block'>
+                  <div className='mt-2'>
                     <input
                       id='reservedUntill'
                       type='date'
@@ -931,7 +952,7 @@ export default function Form() {
                   >
                     Observações
                   </label>
-                  <div className='block'>
+                  <div className='mt-2'>
 
                     <textarea
                       rows={5}
@@ -958,7 +979,7 @@ export default function Form() {
                   >
                     Data do Contrato
                   </label>
-                  <div className='block'>
+                  <div className='mt-2'>
 
                     <input
                       type='date'
@@ -998,7 +1019,7 @@ export default function Form() {
                   + Nova Parcela
                 </Button>
               </div>
-              <table className="w-full border-collapse border border-gray-300">
+              <table id="installments" className="w-full border-collapse border border-gray-300">
                 <thead>
                   <tr className="bg-gray-200">
                     <th className="border p-2">
