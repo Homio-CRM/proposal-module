@@ -19,30 +19,30 @@ type Inputs = z.infer<typeof FormDataSchema>
 
 const steps = [
   {
-    id: 'Passo 1',
+    id: '1',
     name: 'Personal Information',
     fields: ['oppportunityId', 'proposalDate', 'name', 'cpf', 'rg', 'nationality', 'maritalStatus', 'birthDate', 'email', 'phone', 'address', 'zipCode', 'city', 'neighborhood', 'state'],
     subTitle: 'Preencha o ID da oportunidade  para criar a sua proposta.'
   },
   {
-    id: 'Passo 2',
+    id: '2',
     name: 'Cônjuge',
     fields: ['spouseName', 'spouseCpf', 'spouseRg', 'spouseNationality', 'spouseOccupation', 'spouseEmail', 'spousePhone'],
     subTitle: 'Confira os dados do cônjuge'
   },
   {
-    id: 'Passo 3',
+    id: '3',
     name: 'Empreendimento',
     fields: ['building', 'apartmentUnity', 'floor', 'tower', 'vendor', 'reserved', 'observations', 'contractDate'],
     subTitle: 'Confira os dados do empreendimento'
   },
   {
-    id: 'Passo 4',
+    id: '4',
     name: 'Parcelas',
     fields: ['installments'],
     subTitle: 'Confira as parcelas'
   },
-  { id: 'Passo 5', name: 'Complete' }
+  { id: '5', name: 'Complete' }
 ]
 
 
@@ -51,6 +51,7 @@ const steps = [
 export default function Form() {
   const [previousStep, setPreviousStep] = useState(0)
   const [currentStep, setCurrentStep] = useState(0)
+  const [conctactDataOpacity] = useState(0);
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
   const [selectAll, setSelectAll] = useState<boolean>(false);
   const delta = currentStep - previousStep
@@ -64,8 +65,7 @@ export default function Form() {
     watch,
     formState: { errors }
   } = useForm<Inputs>({
-    resolver: zodResolver(FormDataSchema),
-
+    resolver: zodResolver(FormDataSchema)
   })
 
   const { fields, append, remove } = useFieldArray({
@@ -78,12 +78,11 @@ export default function Form() {
     reset()
   }
 
-
-  type fieldName = keyof Inputs
+  type FieldName = keyof Inputs
 
   const next = async () => {
     const fields = steps[currentStep].fields
-    const output = await trigger(fields as fieldName[], { shouldFocus: true })
+    const output = await trigger(fields as FieldName[], { shouldFocus: true })
 
     if (!output) return
 
@@ -150,14 +149,14 @@ export default function Form() {
       cpf: CheckCpf(contact.customFields.find(item => item.id === 'Z6NSHw77VAORaZKcAQr9')?.value as string),
       rg: contact.customFields.find(item => item.id === 'JZZb9gPOSISid1vp3rHh')?.value,
       nationality: contact.customFields.find(item => item.id === '1Xj4odQLI2L5FsXT5jmO')?.value,
-      maritalStatus: contact?.customFields.find(item => item.id === 'a5b5vH65cVyb9QxUF5ef')?.value as
-        | "Solteiro(a)"
-        | "Casado(a)"
-        | "Separado(a)"
-        | "Divorciado(a)"
-        | "Viúvo(a)"
-        | "União Estável"
-        | undefined,
+      maritalStatus: contact?.customFields.find(item => item.id === 'a5b5vH65cVyb9QxUF5ef')?.value as 
+      | "Solteiro(a)"
+      | "Casado(a)"
+      | "Separado(a)"
+      | "Divorciado(a)"
+      | "Viúvo(a)"
+      | "União Estável"
+      | undefined,
       birthDate: contact.dateOfBirth,
       email: contact.email,
       phone: contact.phone,
@@ -173,14 +172,14 @@ export default function Form() {
       spouseOccupation: contact.customFields.find(item => item.id === 'nYaPQ7t2q8gAoelEQq7d')?.value,
       spouseEmail: contact.customFields.find(item => item.id === 'yYf8GlPPsYiQr0ZVKNNE')?.value,
       spousePhone: contact.customFields.find(item => item.id === 'hV8KQRdmFjGQuXqPC5Ah')?.value,
-      building: opportunity.customFields.find(item => item.id === 'EVdLCbbyeUrBrMIFmZVX')?.fieldValueArray[0] as
-        | "Serena By Mivita"
-        | "Lago By Mivita"
-        | "Stage Praia do Canto"
-        | "Next Jardim da Penha"
-        | "Inside Jardim da Penha"
-        | "Quartzo By Mivita"
-        | undefined,
+      building: opportunity.customFields.find(item => item.id === 'EVdLCbbyeUrBrMIFmZVX')?.fieldValueArray[0] as 
+      | "Serena By Mivita"
+      | "Lago By Mivita"
+      | "Stage Praia do Canto"
+      | "Next Jardim da Penha"
+      | "Inside Jardim da Penha"
+      | "Quartzo By Mivita"
+      | undefined,
       apartmentUnity: contact.customFields.find(item => item.id === 'stOGiUa4CDw4mxbo03kU')?.value,
       floor: contact.customFields.find(item => item.id === '65p4lHnuDMqJFeX2iMBI')?.value,
       tower: contact.customFields.find(item => item.id === 'CH2ojxtTvuVhbYxzpyME')?.value,
@@ -192,39 +191,24 @@ export default function Form() {
 
   return (
     <>
-      <section className='flex flex-col justify-between mt-6 ml-6 max-w-7xl'>
+      <section className='flex flex-col justify-between max-w-7xl'>
         <h1 className='text-gray-900 text-3xl'>Criar nova proposta</h1>
-        <p className='text-gray-600 font-normal'>{steps[currentStep].subTitle}</p>
+        <p className='text-gray-600 font-medium'>{steps[currentStep].subTitle}</p>
         {/* steps */}
         <nav aria-label='Progress' className='mt-8'>
-          <ol role='list' className='space-y-4 md:flex md:space-x-8 md:space-y-0'>
-            {steps.map((step, index) => (
-              <li key={step.name} className='md:flex-1'>
-                {currentStep > index ? (
-                  <div className='group flex w-full flex-col border-l-4 border-sky-600 py-2 pl-4 transition-colors md:border-l-0 md:border-t-4 md:pb-0 md:pl-0 md:pt-4'>
-                    <span className='text-sm font-medium text-sky-600 transition-colors '>
+          <ol role='list' className='space-y-4 md:flex md:space-y-0'>
+          {steps.map((step, index) => (
+            <li key={step.name} className="">
+                <div className="group flex justify-center items-center w-full flex-row border-l-2 border-gray-200 py-2 transition-colors md:border-l-0 mr-4">
+                  <div className={`flex justify-center items-center size-[30px] rounded-full ${currentStep > index ? "bg-gradient-to-r from-purple-600 to-blue-500" : "bg-gray-50"}`}>
+                    <span className={`text-base font-medium ${currentStep > index ? "text-white" : "text-gray-600"}`}>
                       {step.id}
                     </span>
-                    <span className='text-sm font-medium'>{step.name}</span>
                   </div>
-                ) : currentStep === index ? (
-                  <div
-                    className='flex w-full flex-col border-l-4 border-sky-600 py-2 pl-4 md:border-l-0 md:border-t-4 md:pb-0 md:pl-0 md:pt-4'
-                    aria-current='step'
-                  >
-                    <span className='text-sm font-medium text-sky-600'>
-                      {step.id}
-                    </span>
-                    <span className='text-sm font-medium'>{step.name}</span>
-                  </div>
-                ) : (
-                  <div className='group flex w-full flex-col border-l-4 border-gray-200 py-2 pl-4 transition-colors md:border-l-0 md:border-t-4 md:pb-0 md:pl-0 md:pt-4'>
-                    <span className='text-sm font-medium text-gray-500 transition-colors'>
-                      {step.id}
-                    </span>
-                    <span className='text-sm font-medium'>{step.name}</span>
-                  </div>
-                )}
+                  {index === steps.length -1 ? "" : 
+                    <div className={`w-[100px] h-[6px] bg-gray-50 ml-4 rounded-full ${currentStep > index ? "bg-gradient-to-r from-purple-600 to-blue-500" : "bg-gray-50"}`}></div>
+                  }
+                </div>
               </li>
             ))}
           </ol>
@@ -238,7 +222,7 @@ export default function Form() {
               animate={{ x: 0, opacity: 1 }}
               transition={{ duration: 0.3, ease: 'easeInOut' }}
             >
-              <div className='mt-10 grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-8'>
+              <div className='mt-6 grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-8'>
                 <div className='sm:col-span-6'>
                   <label
                     htmlFor='opportunityId'
@@ -296,7 +280,7 @@ export default function Form() {
                   </div>
                 </div>
 
-                <div className={`sm:col-span-4`}>
+                <div className={`sm:col-span-4 opacity-${conctactDataOpacity}`}>
                   <label
                     htmlFor='name'
                     className='block text-sm font-bold leading-6 text-gray-900'
@@ -319,7 +303,7 @@ export default function Form() {
                     )}
                   </div>
                 </div>
-                <div className={`sm:col-span-2`}>
+                <div className={`sm:col-span-2 opacity-${conctactDataOpacity}`}>
                   <label
                     htmlFor='cpf'
                     className='block text-sm font-bold leading-6 text-gray-900'
@@ -342,7 +326,7 @@ export default function Form() {
                     )}
                   </div>
                 </div>
-                <div className={'sm:col-span-2'}>
+                <div className={`sm:col-span-2 opacity-${conctactDataOpacity}`}>
 
                   <label
                     htmlFor='rg'
@@ -366,7 +350,7 @@ export default function Form() {
                     )}
                   </div>
                 </div>
-                <div className='sm:col-span-4'>
+                <div className={`sm:col-span-4 opacity-${conctactDataOpacity}`}>
                   <label
                     htmlFor='nationality'
                     className='block text-sm font-bold leading-6 text-gray-900'
@@ -383,7 +367,7 @@ export default function Form() {
                        placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
                     />
                     {errors.nationality?.message && (
-                      <p className='mt-2 font-medium text-sm text-red-400'>
+                      <p className='mt-2 text-sm font-medium text-red-400'>
                         {errors.nationality.message}
                       </p>
                     )}
@@ -398,7 +382,7 @@ export default function Form() {
                     Estado Civil
                   </label>
                   <div className='mt-2'>
-                    <select
+                  <select
                       id='maritalStatus'
                       {...register('maritalStatus')}
                       className='px-3 w-full rounded-md border-0 py-2.5 bg-gray-0 text-gray-900 shadow-sm ring-1
@@ -1032,7 +1016,7 @@ export default function Form() {
               <table id="installments" className="w-full border-collapse border border-gray-300">
                 <thead>
                   <tr className="bg-gray-0 border-y border-gray-50 text-left">
-                    <th className="p-2 font-medium font-sans uppercase text-gray-500">
+                    <th className="p-2 font-bold font-sans uppercase text-gray-500">
                       <input
                         type="checkbox"
                         checked={selectAll}
@@ -1040,11 +1024,11 @@ export default function Form() {
                         className='mr-12 ml-4 p-12 scale-125 border border-gray-700'
                       />
                     </th>
-                    <th className="p-2 text-sm font-bold font-sans uppercase text-gray-500">Condição</th>
-                    <th className="p-2 text-sm font-bold font-sans uppercase  text-gray-500">Valor</th>
-                    <th className="p-2 text-sm font-bold font-sans uppercase  text-gray-500">Qnt. de Parcelas</th>
-                    <th className="p-2 text-sm font-bold font-sans uppercase  text-gray-500">Percentual</th>
-                    <th className="p-2 text-sm font-bold font-sans uppercase  text-gray-500">Data</th>
+                    <th className="text-sm p-2 font-semibold font-sans uppercase text-gray-500">Condição</th>
+                    <th className="text-sm p-2 font-semibold font-sans uppercase  text-gray-500">Valor</th>
+                    <th className="text-sm p-2 font-semibold font-sans uppercase  text-gray-500">Qnt. de Parcelas</th>
+                    <th className="text-sm p-2 font-semibold font-sans uppercase  text-gray-500">Percentual</th>
+                    <th className="text-sm p-2 font-semibold font-sans uppercase  text-gray-500">Data</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1059,35 +1043,35 @@ export default function Form() {
                         />
                       </td>
                       <td className="py-4">
-                        <select className="w-full p-4 bg-gray-50 max-w-max appearance-none rounded-md text-gray-800 font-semibold" {...register(`installments.${index}.type`)}>
+                        <select className="w-full p-4 bg-gray-50 max-w-max appearance-none rounded-md text-gray-600 font-semibold" {...register(`installments.${index}.type`)}>
 
-                          <option className='text-gray-800 font-semibold' value="Sinal">Sinal</option>
-                          <option className='text-gray-800 font-semibold' value="Parcela única">Parcela única</option>
-                          <option className='text-gray-800 font-semibold' value="Mensais">Mensais</option>
-                          <option className='text-gray-800 font-semibold' value="Intermediárias">Intermediárias</option>
-                          <option className='text-gray-800 font-semibold' value="Anuais">Anuais</option>
-                          <option className='text-gray-800 font-semibold' value="30 dias">30 dias</option>
-                          <option className='text-gray-800 font-semibold' value="60 dias">60 dias</option>
-                          <option className='text-gray-800 font-semibold' value="Contrato">Especial</option>
-                          <option className='text-gray-800 font-semibold' value="90 dias">90 dias</option>
-                          <option className='text-gray-800 font-semibold' value="120 dias">120 dias</option>
-                          <option className='text-gray-800 font-semibold' value="Despesa nacompra (30 ?)">Despesa na compra (30 ?)</option>
-                          <option className='text-gray-800 font-semibold' value="Despesa na compra (60 ?)">Despesa na compra (60 ?)</option>
-                          <option className='text-gray-800 font-semibold' value="Bimestrais">Bimestrais</option>
-                          <option className='text-gray-800 font-semibold' value="Trimestrais">Trimestrais</option>
-                          <option className='text-gray-800 font-semibold' value="Comissão Apartada">Comissão Apartada</option>
-                          <option className='text-gray-800 font-semibold' value="Permuta">Permuta</option>
-                          <option className='text-gray-800 font-semibold' value="Chaves"> Chaves</option>
+                          <option className='text-gray-600 font-semibold' value="Sinal">Sinal</option>
+                          <option className='text-gray-600 font-semibold' value="Parcela única">Parcela única</option>
+                          <option className='text-gray-600 font-semibold' value="Mensais">Mensais</option>
+                          <option className='text-gray-600 font-semibold' value="Intermediárias">Intermediárias</option>
+                          <option className='text-gray-600 font-semibold' value="Anuais">Anuais</option>
+                          <option className='text-gray-600 font-semibold' value="30 dias">30 dias</option>
+                          <option className='text-gray-600 font-semibold' value="60 dias">60 dias</option>
+                          <option className='text-gray-600 font-semibold' value="Contrato">Especial</option>
+                          <option className='text-gray-600 font-semibold' value="90 dias">90 dias</option>
+                          <option className='text-gray-600 font-semibold' value="120 dias">120 dias</option>
+                          <option className='text-gray-600 font-semibold' value="Despesa nacompra (30 ?)">Despesa na compra (30 ?)</option>
+                          <option className='text-gray-600 font-semibold' value="Despesa na compra (60 ?)">Despesa na compra (60 ?)</option>
+                          <option className='text-gray-600 font-semibold' value="Bimestrais">Bimestrais</option>
+                          <option className='text-gray-600 font-semibold' value="Trimestrais">Trimestrais</option>
+                          <option className='text-gray-600 font-semibold' value="Comissão Apartada">Comissão Apartada</option>
+                          <option className='text-gray-600 font-semibold' value="Permuta">Permuta</option>
+                          <option className='text-gray-600 font-semibold' value="Chaves"> Chaves</option>
                         </select>
                       </td>
-                      <td className="text-gray-500 font-normal p-2">
-                        <div className='flex content-center font-normal text-lg'>
-                          <p className='text-gray-900 p-1 font-medium'>
+                      <td className="text-gray-300 font-medium p-2">
+                        <div className='flex content-center font-medium text-gray-300'>
+                          <p className='text-gray-900 font-medium mt-1'>
                             R$
                           </p>
                           <input
                             type="text"
-                            className=" font-normal p-1 w-full"
+                            className="text-gray-300 font-medium p-1 w-full"
                             {...register(`installments.${index}.value`)}
                           />
                         </div>
@@ -1095,26 +1079,21 @@ export default function Form() {
                       <td className="p-2">
                         <input
                           type="number"
-                          className="text-gray-600 font-normal p-1 w-full"
+                          className="text-gray-300 font-medium p-1 w-full"
                           {...register(`installments.${index}.amount`, { valueAsNumber: true })}
                         />
                       </td>
-                      <td className=" p-2">
-                        <div className='flex content-center font-normal text-lg'>
-                          <input
-                            type="number"
-                            className="p-1 w-14  text-gray-600 font-normal"
-                            {...register(`installments.${index}.percentage`)}
-                          />
-                          <p className='text-gray-900 p-1 font-medium'>
-                            %
-                          </p>
-                        </div>
+                      <td className="p-2">
+                        <input
+                          type="text"
+                          className="text-gray-300 font-medium p-1 w-full"
+                          {...register(`installments.${index}.percentage`)}
+                        />
                       </td>
                       <td className="p-2">
                         <input
                           type="date"
-                          className=" p-1 w-full  text-gray-600 font-normal text-lg"
+                          className="text-gray-300 font-medium p-1 w-full"
                           {...register(`installments.${index}.paymentDate`)}
                         />
                       </td>
@@ -1145,7 +1124,7 @@ export default function Form() {
         </form>
 
         {/* Navigation */}
-        <div className='mt-8 pt-5'>
+        <div className='py-4'>
           <div className='w-full flex justify-end gap-6'>
             <button
               type='button'

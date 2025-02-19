@@ -1,12 +1,7 @@
-
 import type { Metadata } from "next";
 import localFont from "next/font/local"
-import SideBar from "@/components/SideBar";
-import TitleBar from "@/components/TitleBar";
 import 'material-icons/iconfont/material-icons.css';
 import "./globals.css";
-
-
 
 export const metadata: Metadata = {
   title: "Gerenciador de Propostas",
@@ -68,13 +63,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <body
-        className={` ${helvetica.variable} font-sans`}
-      >
-        <div className="flex">
-          <SideBar></SideBar>
-          <TitleBar text='Empreendimentos Mivita'></TitleBar>
-        </div>
+      <body className={` ${helvetica.variable} font-sans`}>
         {children}
       </body>
     </html>
