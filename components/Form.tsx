@@ -6,14 +6,12 @@ import { motion } from 'framer-motion'
 import { Search } from 'lucide-react'
 import { z } from 'zod'
 import { FormDataSchema } from '@/types/formSchema'
+import { Contact } from '@/types/contactType'
+import { Opportunity } from '@/types/opportunityType'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm, SubmitHandler, useFieldArray } from 'react-hook-form'
 import { Button } from "@/components/ui/button";
-import { GetOpportunities } from "@/lib/requests"
-import { GetContacts } from "@/lib/requests"
-import { Contact } from '@/types/contactType'
-import { Opportunity } from '@/types/opportunityType'
-
+import { getOpportunities, getContacts, postProposal, postContact, getContact } from "@/lib/requests"
 
 type Inputs = z.infer<typeof FormDataSchema>
 
@@ -45,12 +43,10 @@ const steps = [
   { id: '5', name: 'Complete' }
 ]
 
-
-
-
 export default function Form() {
   const [previousStep, setPreviousStep] = useState(0)
   const [currentStep, setCurrentStep] = useState(0)
+  const [contactId, setContactId] = useState('')
   const [conctactDataOpacity] = useState(0);
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
   const [selectAll, setSelectAll] = useState<boolean>(false);
@@ -73,9 +69,15 @@ export default function Form() {
     name: "installments",
   });
 
-  const processForm: SubmitHandler<Inputs> = data => {
-    console.log(data)
-    reset()
+  const onSubmit: SubmitHandler<Inputs> = async (data) => {
+    const contact = await getContact(contactId)
+    if(contact.data.length > 0) {
+      await postProposal(data, contact.data[0].id)
+    }
+    else {
+      const newContact = await postContact(contactId, data)
+      await postProposal(data, newContact.data.id)
+    }
   }
 
   type FieldName = keyof Inputs
@@ -88,7 +90,7 @@ export default function Form() {
 
     if (currentStep < steps.length - 1) {
       if (currentStep === steps.length - 2) {
-        await handleSubmit(processForm)()
+        await handleSubmit(onSubmit)()
       }
       setPreviousStep(currentStep)
       setCurrentStep(step => step + 1)
@@ -101,7 +103,6 @@ export default function Form() {
       setCurrentStep(step => step - 1)
     }
   }
-
 
   const toggleSelectAll = () => {
     if (selectAll) {
@@ -128,17 +129,18 @@ export default function Form() {
 
   async function updateInformations() {
     const opportunityId = watch('opportunityId')
-    const opportunity = await GetOpportunities(opportunityId)
+    const opportunity = await getOpportunities(opportunityId)
     if (!opportunity) return;
     const contactId = opportunity.contactId
-    const contact = await GetContacts(contactId)
+    setContactId(contactId)
+    const contact = await getContacts(contactId)
     updateLabels(contact, opportunity)
   }
 
-  function CheckCpf(cpf: string): string {
+  function checkCpf(cpf: string): string {
     if (cpf && /^.{11,14}$/.test(cpf)) {
-      cpf = cpf.replace(/\D/g, '');
-      cpf = cpf.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4');
+      cpf = cpf.toString().replace(/\D/g, '');
+      cpf = cpf.toString().replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4');
     }
     return cpf
   }
@@ -146,7 +148,7 @@ export default function Form() {
   function updateLabels(contact: Contact, opportunity: Opportunity) {
     reset({
       name: contact.firstName + ' ' + contact.lastName,
-      cpf: CheckCpf(contact.customFields.find(item => item.id === 'Z6NSHw77VAORaZKcAQr9')?.value as string),
+      cpf: checkCpf(contact.customFields.find(item => item.id === 'Z6NSHw77VAORaZKcAQr9')?.value as string),
       rg: contact.customFields.find(item => item.id === 'JZZb9gPOSISid1vp3rHh')?.value,
       nationality: contact.customFields.find(item => item.id === '1Xj4odQLI2L5FsXT5jmO')?.value,
       maritalStatus: contact?.customFields.find(item => item.id === 'a5b5vH65cVyb9QxUF5ef')?.value as 
@@ -166,7 +168,7 @@ export default function Form() {
       neighborhood: contact.customFields.find(item => item.id === 'BppzAoRqxsTWpdFcJwam')?.value,
       state: contact.state,
       spouseName: contact.customFields.find(item => item.id === 'pkKduZf7cQrfaB7At0qO')?.value,
-      spouseCpf: CheckCpf(contact.customFields.find(item => item.id === 'O0n5OIILrSve13ZcFiA0')?.value as string),
+      spouseCpf: checkCpf(contact.customFields.find(item => item.id === 'O0n5OIILrSve13ZcFiA0')?.value as string),
       spouseRg: contact.customFields.find(item => item.id === '2j2YXdg5ND441jRpMohZ')?.value,
       spouseNationality: contact.customFields.find(item => item.id === 'rUcp7m2vwTP6Rt7d58q4')?.value,
       spouseOccupation: contact.customFields.find(item => item.id === 'nYaPQ7t2q8gAoelEQq7d')?.value,
@@ -215,7 +217,7 @@ export default function Form() {
         </nav>
 
         {/* Form */}
-        <form className='py-6 max-w-ml-65xl' onSubmit={handleSubmit(processForm)}>
+        <form className='py-6 max-w-ml-65xl' onSubmit={handleSubmit(onSubmit)}>
           {currentStep === 0 && (
             <motion.div
               initial={{ x: delta >= 0 ? '50%' : '-50%', opacity: 0 }}
@@ -1062,6 +1064,7 @@ export default function Form() {
                           <option className='text-gray-600 font-semibold' value="Comissão Apartada">Comissão Apartada</option>
                           <option className='text-gray-600 font-semibold' value="Permuta">Permuta</option>
                           <option className='text-gray-600 font-semibold' value="Chaves"> Chaves</option>
+                          <option className='text-gray-600 font-semibold' value="Chaves"> Financiamento</option>
                         </select>
                       </td>
                       <td className="text-gray-300 font-medium p-2">
@@ -1143,7 +1146,9 @@ export default function Form() {
                to-indigo-500 px-16 py-2 text-md font-medium text-indigo-0 
                shadow-sm  hover:bg-sky-50  disabled:cursor-not-allowed disabled:opacity-50'
             >
-              {currentStep === steps.length - 1 ? "Finalizar" : "Próximo"}
+              {currentStep === steps.length - 1 ? "Finalizar" 
+              : currentStep === steps.length - 2 ? "Enviar" : "Próximo"}
+
             </button>
           </div>
         </div>

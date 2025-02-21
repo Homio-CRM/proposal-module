@@ -38,11 +38,12 @@ export const FormDataSchema = z.object({
       'Financiamento', '30 dias', '60 dias', 'Contrato', 'Especial',
       '90 dias', '120 dias', 'Despesa na  compra (30 ?)',
       'Despesa na  compra (60 ?)', 'Bimestrais', 'Trimestrais',
-      'Bienais', 'Trienais', 'Comissão Apartada', 'Permuta', 'Chaves'
+      'Bienais', 'Trienais', 'Comissão Apartada', 'Permuta', 'Chaves', 'Financiamento'
     ], { message: 'Condição inválida' }),
     value: z.string().min(1, 'Valor é Obrigatório'),
     amount: z.number().min(1, 'Quantidade é Obrigatório'),
     percentage: z.string().min(1, 'Percentual é Obrigatório'),
     paymentDate: z.string().min(1, 'Data é Obrigatório'),
+    contactId: z.string().optional()
   }))
 })

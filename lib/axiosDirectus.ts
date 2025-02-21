@@ -1,7 +1,7 @@
 import axios from "axios";
 
-const mivita = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_HOMIO_API_MIVITA_BASE_URL,
+const directus = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_DIRECTUS_BASE_URL,
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",
@@ -9,4 +9,4 @@ const mivita = axios.create({
   }
 });
 
-export default mivita;
+export default directus;
