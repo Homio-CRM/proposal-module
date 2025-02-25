@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import Image from 'next/image'
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Search } from 'lucide-react'
@@ -11,7 +12,7 @@ import { Opportunity } from '@/types/opportunityType'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm, SubmitHandler, useFieldArray } from 'react-hook-form'
 import { Button } from "@/components/ui/button";
-import { getOpportunities, getContacts, postProposal, postContact, getContact } from "@/lib/requests"
+import { getOpportunities, getContacts, postProposal, postContact, getContact, postConnection, getProposal, patchProposal, patchContact, postNoteToHomio } from "@/lib/requests"
 
 type Inputs = z.infer<typeof FormDataSchema>
 
@@ -47,6 +48,7 @@ export default function Form() {
   const [previousStep, setPreviousStep] = useState(0)
   const [currentStep, setCurrentStep] = useState(0)
   const [contactId, setContactId] = useState('')
+  const [opportunityId, setOpportunityId] = useState('')
   const [conctactDataOpacity] = useState(0);
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
   const [selectAll, setSelectAll] = useState<boolean>(false);
@@ -56,9 +58,11 @@ export default function Form() {
     register,
     handleSubmit,
     reset,
+    getValues,
     trigger,
     control,
     watch,
+    setValue,
     formState: { errors }
   } = useForm<Inputs>({
     resolver: zodResolver(FormDataSchema)
@@ -70,14 +74,24 @@ export default function Form() {
   });
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    const contact = await getContact(contactId)
-    if(contact.data.length > 0) {
-      await postProposal(data, contact.data[0].id)
-    }
-    else {
-      const newContact = await postContact(contactId, data)
-      await postProposal(data, newContact.data.id)
-    }
+    // let contact = await getContact(contactId)
+    // let proposal = await getProposal(opportunityId)
+    // if(contact.data.length > 0) {
+    //   await patchContact(contact.data[0].id, data)
+    //   if(proposal.data.length > 0) {
+    //     await patchProposal(proposal.data[0].id, data)
+    //   }
+    //   else {
+    //     proposal = await postProposal(data)
+    //     await postConnection(contact.data.id, proposal.data.id)
+    //   }
+    // }
+    // else {
+    //   contact = await postContact(contactId, data)
+    //   proposal = await postProposal(data)
+    //   await postConnection(contact.data.id, proposal.data.id)
+    // }
+    // await postNoteToHomio(data)
   }
 
   type FieldName = keyof Inputs
@@ -85,6 +99,10 @@ export default function Form() {
   const next = async () => {
     const fields = steps[currentStep].fields
     const output = await trigger(fields as FieldName[], { shouldFocus: true })
+
+    if(currentStep === steps.length - 1) {
+      window.location.reload();
+    }
 
     if (!output) return
 
@@ -129,6 +147,7 @@ export default function Form() {
 
   async function updateInformations() {
     const opportunityId = watch('opportunityId')
+    setOpportunityId(opportunityId)
     const opportunity = await getOpportunities(opportunityId)
     if (!opportunity) return;
     const contactId = opportunity.contactId
@@ -139,10 +158,20 @@ export default function Form() {
 
   function checkCpf(cpf: string): string {
     if (cpf && /^.{11,14}$/.test(cpf)) {
-      cpf = cpf.toString().replace(/\D/g, '');
-      cpf = cpf.toString().replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4');
+      cpf = cpf.toString().replace(/\D/g, '')
+      cpf = cpf.toString().replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4')
     }
     return cpf
+  }
+
+  function checkCep(cep: string): string {
+    console.log(cep)
+    if (cep && cep.replace(/\D/g, '').length === 8) {
+      return cep.replace(/\D/g, '').replace(/(\d{5})(\d{3})/, '$1-$2')
+    }
+    else {
+      return cep
+    }
   }
 
   function updateLabels(contact: Contact, opportunity: Opportunity) {
@@ -163,7 +192,7 @@ export default function Form() {
       email: contact.email,
       phone: contact.phone,
       address: contact.address1 + contact?.customFields.find(item => item.id === 'K8u7EgoKjMRZdq8Mnhku')?.value,
-      zipCode: contact.postalCode,
+      zipCode: checkCep(contact.postalCode),
       city: contact.city,
       neighborhood: contact.customFields.find(item => item.id === 'BppzAoRqxsTWpdFcJwam')?.value,
       state: contact.state,
@@ -191,19 +220,25 @@ export default function Form() {
     })
   }
 
+  function updateTotalValue() {
+    const installmentsValue = watch(installments.installmentsValue)
+    const amount = watch(installments.amount)
+    setValue('installments.totalValue', installmentsValue * amount)
+  }
+
   return (
     <>
-      <section className='flex flex-col justify-between max-w-7xl'>
+      <section className='flex flex-col justify-between'>
         <h1 className='text-gray-900 text-3xl'>Criar nova proposta</h1>
         <p className='text-gray-600 font-medium'>{steps[currentStep].subTitle}</p>
         {/* steps */}
-        <nav aria-label='Progress' className='mt-8'>
+        <nav aria-label='Progress' className='mt-6'>
           <ol role='list' className='space-y-4 md:flex md:space-y-0'>
           {steps.map((step, index) => (
             <li key={step.name} className="">
                 <div className="group flex justify-center items-center w-full flex-row border-l-2 border-gray-200 py-2 transition-colors md:border-l-0 mr-4">
-                  <div className={`flex justify-center items-center size-[30px] rounded-full ${currentStep > index ? "bg-gradient-to-r from-purple-600 to-blue-500" : "bg-gray-50"}`}>
-                    <span className={`text-base font-medium ${currentStep > index ? "text-white" : "text-gray-600"}`}>
+                  <div className={`flex justify-center items-center size-[30px] rounded-full ${currentStep === steps.length - 1 ? "bg-gradient-to-r from-purple-600 to-blue-500" : currentStep > index ? "bg-gradient-to-r from-purple-600 to-blue-500" : "bg-gray-50"}`}>
+                    <span className={`text-base font-medium ${currentStep === steps.length - 1 ? "text-white" : currentStep > index ? "text-white" : "text-gray-600"}`}>
                       {step.id}
                     </span>
                   </div>
@@ -860,7 +895,7 @@ export default function Form() {
                   >
                     Pavimento
                   </label>
-                  <div className='floor'>
+                  <div className='floor mt-2'>
                     <input
                       id='floor'
                       type='text'
@@ -1009,7 +1044,7 @@ export default function Form() {
               <div className="w-full flex justify-end">
                 <Button
                   type="button"
-                  onClick={() => append({ type: "Sinal", value: "", amount: 1, percentage: "100%", paymentDate: "" })}
+                  onClick={() => append({ type: "Sinal", totalValue: "", amount: 1, installmentsValue: "", paymentDate: "" })}
                   className="m-4 bg-indigo-500 hover:bg-indigo-600 text-md"
                 >
                   + Nova Parcela
@@ -1027,9 +1062,9 @@ export default function Form() {
                       />
                     </th>
                     <th className="text-sm p-2 font-semibold font-sans uppercase text-gray-500">Condição</th>
-                    <th className="text-sm p-2 font-semibold font-sans uppercase  text-gray-500">Valor</th>
+                    <th className="text-sm p-2 font-semibold font-sans uppercase  text-gray-500">Valor das parcelas</th>
                     <th className="text-sm p-2 font-semibold font-sans uppercase  text-gray-500">Qnt. de Parcelas</th>
-                    <th className="text-sm p-2 font-semibold font-sans uppercase  text-gray-500">Percentual</th>
+                    <th className="text-sm p-2 font-semibold font-sans uppercase  text-gray-500">Valor total</th>
                     <th className="text-sm p-2 font-semibold font-sans uppercase  text-gray-500">Data</th>
                   </tr>
                 </thead>
@@ -1075,7 +1110,7 @@ export default function Form() {
                           <input
                             type="text"
                             className="text-gray-300 font-medium p-1 w-full"
-                            {...register(`installments.${index}.value`)}
+                            {...register(`installments.${index}.installmentsValue`)}
                           />
                         </div>
                       </td>
@@ -1089,8 +1124,10 @@ export default function Form() {
                       <td className="p-2">
                         <input
                           type="text"
+                          value={`${getValues(item[index].installmentsValue) === undefined ? "" :  getValues(item[index].installmentsValue) * getValues(item[index].amount) === undefined ? "" : getValues(item[index].amount)}`}
+                          readOnly
                           className="text-gray-300 font-medium p-1 w-full"
-                          {...register(`installments.${index}.percentage`)}
+                          {...register(`installments.${index}.totalValue`)}
                         />
                       </td>
                       <td className="p-2">
@@ -1116,12 +1153,25 @@ export default function Form() {
           )}
           {currentStep === 4 && (
             <>
-              <h2 className='text-base font-semibold leading-7 text-gray-900'>
-                Complete
+            <div className='mt-12 flex flex-col items-center justify-center'>
+              <div className='flex items-center justify-center rounded-full w-[140px] h-[140px] shadow-[0px_0px_30px_rgba(0,0,0,0)] bg-indigo-500 shadow-indigo-500/60'>
+                <Image width={60} height={60} src='checkmark.svg' alt='Homio Logo'></Image>
+              </div>
+              <h2 className='mt-4 text-xl font-semibold leading-7 text-gray-900'>
+                Proposta criada com sucesso
               </h2>
-              <p className='mt-1 text-sm leading-6 text-gray-600'>
-                Thank you for your submission.
+              <p className='text-sm font-medium leading-6 text-gray-600'>
+                Selecione uma opção abaixo
               </p>
+              <button onClick={next} className='mt-8 z-10 rounded-full bg-indigo-500 px-20 py-2 text-md font-medium text-indigo-0 
+               shadow-lg shadow-indigo-500/40 hover:bg-indigo-600 disabled:cursor-not-allowed disabled:opacity-50'>
+                Criar outra
+              </button>
+              <button onClick={prev} className='mt-3 rounded-full bg-[#F3F1FF] px-16 py-2 text-md font-medium text-gray-500 shadow-sm 
+                hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50'>
+                Voltar
+              </button>
+            </div>
             </>
           )}
         </form>
@@ -1133,21 +1183,21 @@ export default function Form() {
               type='button'
               onClick={prev}
               disabled={currentStep === 0}
-              className={` rounded-full
+              className={`rounded-full
                bg-[#F3F1FF] px-16 py-2 text-md font-medium text-gray-500 shadow-sm 
-                hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50`}
+                hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 ${currentStep === steps.length - 1 ? "hidden invisible" : "block visible"}`}
             >
               Voltar
             </button>
             <button
               type='button'
               onClick={next}
-              className='rounded-full bg-gradient-to-r from-purple-300
+              className={`rounded-full bg-gradient-to-r from-purple-300
                to-indigo-500 px-16 py-2 text-md font-medium text-indigo-0 
-               shadow-sm  hover:bg-sky-50  disabled:cursor-not-allowed disabled:opacity-50'
+               shadow-sm hover:bg-sky-50 disabled:cursor-not-allowed disabled:opacity-50 ${currentStep === steps.length - 1 ? "hidden invisible" : "block visible"}`}
             >
-              {currentStep === steps.length - 1 ? "Finalizar" 
-              : currentStep === steps.length - 2 ? "Enviar" : "Próximo"}
+              {currentStep === steps.length - 1 ? "Criar nova proposta" 
+              : currentStep === steps.length - 2 ? "Finalizar" : "Próximo"}
 
             </button>
           </div>
