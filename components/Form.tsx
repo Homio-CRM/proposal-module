@@ -49,6 +49,7 @@ export default function Form() {
   const [currentStep, setCurrentStep] = useState(0)
   const [contactId, setContactId] = useState('')
   const [opportunityId, setOpportunityId] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
   const [conctactDataOpacity] = useState(0);
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
   const [selectAll, setSelectAll] = useState<boolean>(false);
@@ -72,6 +73,7 @@ export default function Form() {
   });
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
+    setIsLoading(true)
     let contact = await getContact(contactId)
     let proposal = await getProposal(opportunityId)
     if(contact.data.length > 0) {
@@ -94,6 +96,7 @@ export default function Form() {
       return acc + value;
     }, 0)
     await postNoteToHomio(data, totalProposalValue)
+    setIsLoading(false)
   }
 
   type FieldName = keyof Inputs
@@ -1215,6 +1218,7 @@ export default function Form() {
             <button
               type='button'
               onClick={next}
+              disabled={isLoading}
               className={`rounded-full bg-gradient-to-r from-purple-300
                to-indigo-500 px-16 py-2 text-md font-medium text-indigo-0 
                shadow-sm hover:bg-sky-50 disabled:cursor-not-allowed disabled:opacity-50 ${currentStep === steps.length - 1 ? "hidden invisible" : "block visible"}`}
