@@ -76,9 +76,9 @@ export default function Form() {
     setIsLoading(true)
     let contact = await getContact(contactId)
     let proposal = await getProposal(opportunityId)
-    if(contact.data.length > 0) {
+    if (contact.data.length > 0) {
       await patchContact(contact.data[0].id, data)
-      if(proposal.data.length > 0) {
+      if (proposal.data.length > 0) {
         await patchProposal(proposal.data[0].id, data)
       }
       else {
@@ -105,7 +105,7 @@ export default function Form() {
     const fields = steps[currentStep].fields
     const output = await trigger(fields as FieldName[], { shouldFocus: true })
 
-    if(currentStep === steps.length - 1) {
+    if (currentStep === steps.length - 1) {
       window.location.reload();
     }
 
@@ -184,14 +184,14 @@ export default function Form() {
       cpf: checkCpf(contact.customFields.find(item => item.id === 'Z6NSHw77VAORaZKcAQr9')?.value as string),
       rg: contact.customFields.find(item => item.id === 'JZZb9gPOSISid1vp3rHh')?.value,
       nationality: contact.customFields.find(item => item.id === '1Xj4odQLI2L5FsXT5jmO')?.value,
-      maritalStatus: contact?.customFields.find(item => item.id === 'a5b5vH65cVyb9QxUF5ef')?.value as 
-      | "Solteiro(a)"
-      | "Casado(a)"
-      | "Separado(a)"
-      | "Divorciado(a)"
-      | "Viúvo(a)"
-      | "União Estável"
-      | undefined,
+      maritalStatus: contact?.customFields.find(item => item.id === 'a5b5vH65cVyb9QxUF5ef')?.value as
+        | "Solteiro(a)"
+        | "Casado(a)"
+        | "Separado(a)"
+        | "Divorciado(a)"
+        | "Viúvo(a)"
+        | "União Estável"
+        | undefined,
       birthDate: contact.dateOfBirth,
       email: contact.email,
       phone: contact.phone,
@@ -207,14 +207,14 @@ export default function Form() {
       spouseOccupation: contact.customFields.find(item => item.id === 'nYaPQ7t2q8gAoelEQq7d')?.value,
       spouseEmail: contact.customFields.find(item => item.id === 'yYf8GlPPsYiQr0ZVKNNE')?.value,
       spousePhone: contact.customFields.find(item => item.id === 'hV8KQRdmFjGQuXqPC5Ah')?.value,
-      building: opportunity.customFields.find(item => item.id === 'EVdLCbbyeUrBrMIFmZVX')?.fieldValueArray[0] as 
-      | "Serena By Mivita"
-      | "Lago By Mivita"
-      | "Stage Praia do Canto"
-      | "Next Jardim da Penha"
-      | "Inside Jardim da Penha"
-      | "Quartzo By Mivita"
-      | undefined,
+      building: opportunity.customFields.find(item => item.id === 'EVdLCbbyeUrBrMIFmZVX')?.fieldValueArray[0] as
+        | "Serena By Mivita"
+        | "Lago By Mivita"
+        | "Stage Praia do Canto"
+        | "Next Jardim da Penha"
+        | "Inside Jardim da Penha"
+        | "Quartzo By Mivita"
+        | undefined,
       apartmentUnity: contact.customFields.find(item => item.id === 'stOGiUa4CDw4mxbo03kU')?.value,
       floor: contact.customFields.find(item => item.id === '65p4lHnuDMqJFeX2iMBI')?.value,
       tower: contact.customFields.find(item => item.id === 'CH2ojxtTvuVhbYxzpyME')?.value,
@@ -238,15 +238,15 @@ export default function Form() {
         {/* steps */}
         <nav aria-label='Progress' className='mt-6'>
           <ol role='list' className='space-y-4 md:flex md:space-y-0'>
-          {steps.map((step, index) => (
-            <li key={step.name} className="">
+            {steps.map((step, index) => (
+              <li key={step.name} className="">
                 <div className="group flex justify-center items-center w-full flex-row border-l-2 border-gray-200 py-2 transition-colors md:border-l-0 mr-4">
                   <div className={`flex justify-center items-center size-[30px] rounded-full ${currentStep === steps.length - 1 ? "bg-gradient-to-r from-purple-600 to-blue-500" : currentStep > index ? "bg-gradient-to-r from-purple-600 to-blue-500" : "bg-gray-50"}`}>
                     <span className={`text-base font-medium ${currentStep === steps.length - 1 ? "text-white" : currentStep > index ? "text-white" : "text-gray-600"}`}>
                       {step.id}
                     </span>
                   </div>
-                  {index === steps.length -1 ? "" : 
+                  {index === steps.length - 1 ? "" :
                     <div className={`w-[100px] h-[6px] bg-gray-50 ml-4 rounded-full ${currentStep > index ? "bg-gradient-to-r from-purple-600 to-blue-500" : "bg-gray-50"}`}></div>
                   }
                 </div>
@@ -423,7 +423,7 @@ export default function Form() {
                     Estado Civil
                   </label>
                   <div className='mt-2'>
-                  <select
+                    <select
                       id='maritalStatus'
                       {...register('maritalStatus')}
                       className='px-3 w-full rounded-md border-0 py-2.5 bg-gray-0 text-gray-900 shadow-sm ring-1
@@ -1128,8 +1128,8 @@ export default function Form() {
                       <td className="p-2">
                         <input
                           type="text"
-                          value={ 
-                            (Number(watch(`installments.${index}.installmentsValue`)) || 0) * 
+                          value={
+                            (Number(watch(`installments.${index}.installmentsValue`)) || 0) *
                             (Number(watch(`installments.${index}.amount`)) || 0)}
                           readOnly
                           className="text-gray-300 font-medium p-1 w-full"
@@ -1161,7 +1161,7 @@ export default function Form() {
                             const value = (Number(curr.installmentsValue) || 0) * (Number(curr.amount) || 0);
                             return acc + value;
                           }, 0)}
-                        </p>                       
+                        </p>
                       </div>
                     </td>
                   </tr>
@@ -1179,25 +1179,25 @@ export default function Form() {
           )}
           {currentStep === 4 && (
             <>
-            <div className='mt-12 flex flex-col items-center justify-center'>
-              <div className='flex items-center justify-center rounded-full w-[140px] h-[140px] shadow-[0px_0px_30px_rgba(0,0,0,0)] bg-indigo-500 shadow-indigo-500/60'>
-                <Image width={60} height={60} src='checkmark.svg' alt='Homio Logo'></Image>
-              </div>
-              <h2 className='mt-4 text-xl font-semibold leading-7 text-gray-900'>
-                Proposta criada com sucesso
-              </h2>
-              <p className='text-sm font-medium leading-6 text-gray-600'>
-                Selecione uma opção abaixo
-              </p>
-              <button onClick={next} className='mt-8 z-10 rounded-full bg-indigo-500 px-20 py-2 text-md font-medium text-indigo-0 
+              <div className='mt-12 flex flex-col items-center justify-center'>
+                <div className='flex items-center justify-center rounded-full w-[140px] h-[140px] shadow-[0px_0px_30px_rgba(0,0,0,0)] bg-indigo-500 shadow-indigo-500/60'>
+                  <Image width={60} height={60} src='checkmark.svg' alt='Homio Logo'></Image>
+                </div>
+                <h2 className='mt-4 text-xl font-semibold leading-7 text-gray-900'>
+                  Proposta criada com sucesso
+                </h2>
+                <p className='text-sm font-medium leading-6 text-gray-600'>
+                  Selecione uma opção abaixo
+                </p>
+                <button onClick={next} className='mt-8 z-10 rounded-full bg-indigo-500 px-20 py-2 text-md font-medium text-indigo-0 
                shadow-lg shadow-indigo-500/40 hover:bg-indigo-600 disabled:cursor-not-allowed disabled:opacity-50'>
-                Criar outra
-              </button>
-              <button onClick={prev} className='mt-3 rounded-full bg-[#F3F1FF] px-16 py-2 text-md font-medium text-gray-500 shadow-sm 
+                  Criar outra
+                </button>
+                <button onClick={prev} className='mt-3 rounded-full bg-[#F3F1FF] px-16 py-2 text-md font-medium text-gray-500 shadow-sm 
                 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50'>
-                Voltar
-              </button>
-            </div>
+                  Voltar
+                </button>
+              </div>
             </>
           )}
         </form>
@@ -1223,8 +1223,8 @@ export default function Form() {
                to-indigo-500 px-16 py-2 text-md font-medium text-indigo-0 
                shadow-sm hover:bg-sky-50 disabled:cursor-not-allowed disabled:opacity-50 ${currentStep === steps.length - 1 ? "hidden invisible" : "block visible"}`}
             >
-              {currentStep === steps.length - 1 ? "Criar nova proposta" 
-              : currentStep === steps.length - 2 ? "Finalizar" : "Próximo"}
+              {currentStep === steps.length - 1 ? "Criar nova proposta"
+                : currentStep === steps.length - 2 ? "Finalizar" : "Próximo"}
 
             </button>
           </div>
