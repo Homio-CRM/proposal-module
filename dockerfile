@@ -6,11 +6,11 @@ COPY package*.json ./
 
 RUN npm install --legacy-peer-deps
 
+COPY .env ./
+
 COPY . .
 
-ENV NODE_ENV production
-
-RUN npm run build --legacy-peer-deps
+RUN npm run build
 
 EXPOSE 8080
 
