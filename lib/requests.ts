@@ -97,9 +97,9 @@ export async function postProposal(proposal: proposalSchema) {
       "installments": proposal.installments.map((installment) => {
         return {
           "type": installment.type,
-          "value": installment.value,
+          "installmentsValue": installment.installmentsValue,
           "amount": installment.amount,
-          "percentage": installment.percentage,
+          "totalValue": installment.totalValue,
           "paymentDate": installment.paymentDate
         };
       }),
@@ -240,9 +240,9 @@ export async function patchProposal(registerId: string, proposal: proposalSchema
       "installments": proposal.installments.map((installment) => {
         return {
           "type": installment.type,
-          "value": installment.value,
+          "installmentsValue": installment.installmentsValue,
           "amount": installment.amount,
-          "percentage": installment.percentage,
+          "totalValue": installment.totalValue,
           "paymentDate": installment.paymentDate
         };
       })

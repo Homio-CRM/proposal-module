@@ -58,11 +58,9 @@ export default function Form() {
     register,
     handleSubmit,
     reset,
-    getValues,
     trigger,
     control,
     watch,
-    setValue,
     formState: { errors }
   } = useForm<Inputs>({
     resolver: zodResolver(FormDataSchema)
@@ -165,7 +163,6 @@ export default function Form() {
   }
 
   function checkCep(cep: string): string {
-    console.log(cep)
     if (cep && cep.replace(/\D/g, '').length === 8) {
       return cep.replace(/\D/g, '').replace(/(\d{5})(\d{3})/, '$1-$2')
     }
@@ -220,11 +217,11 @@ export default function Form() {
     })
   }
 
-  function updateTotalValue() {
-    const installmentsValue = watch(installments.installmentsValue)
-    const amount = watch(installments.amount)
-    setValue('installments.totalValue', installmentsValue * amount)
-  }
+  // function updateTotalValue() {
+  //   const installmentsValue = watch(installments.installmentsValue)
+  //   const amount = watch(installments.amount)
+  //   setValue('installments.totalValue', installmentsValue * amount)
+  // }
 
   return (
     <>
@@ -1124,7 +1121,9 @@ export default function Form() {
                       <td className="p-2">
                         <input
                           type="text"
-                          value={`${getValues(item[index].installmentsValue) === undefined ? "" :  getValues(item[index].installmentsValue) * getValues(item[index].amount) === undefined ? "" : getValues(item[index].amount)}`}
+                          value={ 
+                            (Number(watch(`installments.${index}.installmentsValue`)) || 0) * 
+                            (Number(watch(`installments.${index}.amount`)) || 0)}
                           readOnly
                           className="text-gray-300 font-medium p-1 w-full"
                           {...register(`installments.${index}.totalValue`)}
