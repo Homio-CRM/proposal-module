@@ -72,24 +72,28 @@ export default function Form() {
   });
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    // let contact = await getContact(contactId)
-    // let proposal = await getProposal(opportunityId)
-    // if(contact.data.length > 0) {
-    //   await patchContact(contact.data[0].id, data)
-    //   if(proposal.data.length > 0) {
-    //     await patchProposal(proposal.data[0].id, data)
-    //   }
-    //   else {
-    //     proposal = await postProposal(data)
-    //     await postConnection(contact.data.id, proposal.data.id)
-    //   }
-    // }
-    // else {
-    //   contact = await postContact(contactId, data)
-    //   proposal = await postProposal(data)
-    //   await postConnection(contact.data.id, proposal.data.id)
-    // }
-    // await postNoteToHomio(data)
+    let contact = await getContact(contactId)
+    let proposal = await getProposal(opportunityId)
+    if(contact.data.length > 0) {
+      await patchContact(contact.data[0].id, data)
+      if(proposal.data.length > 0) {
+        await patchProposal(proposal.data[0].id, data)
+      }
+      else {
+        proposal = await postProposal(data)
+        await postConnection(contact.data.id, proposal.data.id)
+      }
+    }
+    else {
+      contact = await postContact(contactId, data)
+      proposal = await postProposal(data)
+      await postConnection(contact.data.id, proposal.data.id)
+    }
+    const totalProposalValue = (watch("installments") || []).reduce((acc, curr) => {
+      const value = (Number(curr.installmentsValue) || 0) * (Number(curr.amount) || 0);
+      return acc + value;
+    }, 0)
+    await postNoteToHomio(data, totalProposalValue)
   }
 
   type FieldName = keyof Inputs
@@ -1139,6 +1143,26 @@ export default function Form() {
                     </tr>
                   ))}
                 </tbody>
+                <tfoot>
+                  <tr>
+                    <td className="py-2 pl-5 bg-gray-0" colSpan={6}>
+                      <div className='flex flex-row text-gray-600'>
+                        <p className='font-medium'>
+                          VALOR TOTAL :
+                        </p>
+                        <p className='font-medium ml-4'>
+                          R$
+                        </p>
+                        <p className='text-gray-600 font-medium ml-1'>
+                          {(watch("installments") || []).reduce((acc, curr) => {
+                            const value = (Number(curr.installmentsValue) || 0) * (Number(curr.amount) || 0);
+                            return acc + value;
+                          }, 0)}
+                        </p>                       
+                      </div>
+                    </td>
+                  </tr>
+                </tfoot>
               </table>
 
               <div className="mt-4 flex gap-4">

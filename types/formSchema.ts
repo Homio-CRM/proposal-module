@@ -40,10 +40,10 @@ export const FormDataSchema = z.object({
       'Despesa na  compra (60 ?)', 'Bimestrais', 'Trimestrais',
       'Bienais', 'Trienais', 'Comissão Apartada', 'Permuta', 'Chaves', 'Financiamento'
     ], { message: 'Condição inválida' }),
-    totalValue: z.string().min(1, 'Valor é Obrigatório'),
+    installmentsValue: z.string().min(1, 'Valor é Obrigatório'),
     amount: z.number().min(1, 'Quantidade é Obrigatório'),
-    installmentsValue: z.string().min(1, 'Percentual é Obrigatório'),
+    totalValue: z.string(),
     paymentDate: z.string().min(1, 'Data é Obrigatório'),
-    contactId: z.string().optional()
-  }))
+  })),
+  contactId: z.string().optional()
 })

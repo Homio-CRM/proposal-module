@@ -51,7 +51,7 @@ export async function getContacts(ContactId: string): Promise<Contact> {
   }
 }
 
-export async function postNoteToHomio(proposal: proposalSchema) {
+export async function postNoteToHomio(proposal: proposalSchema, totalProposalValue: number) {
   try {
     const body = {
       "homioOpportunityId": proposal.opportunityId,
@@ -64,7 +64,8 @@ export async function postNoteToHomio(proposal: proposalSchema) {
           "totalValue": installment.totalValue,
           "paymentDate": installment.paymentDate
         };
-      })
+      }),
+      "totalProposalValue": totalProposalValue
     };
     const response = await mivita.post(
       "/proposal-to-homio",
