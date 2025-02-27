@@ -72,7 +72,7 @@ export async function postNoteToHomio(proposal: proposalSchema, totalProposalVal
       body,
       {
         headers: {
-          
+
         }
       }
     );

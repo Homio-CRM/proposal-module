@@ -1129,7 +1129,7 @@ export default function Form() {
                         <input
                           type="text"
                           value={
-                            (Number(watch(`installments.${index}.installmentsValue`)) || 0) *
+                            (parseFloat(watch(`installments.${index}.installmentsValue`).replace('.', '').replace(',', '.')) || 0) *
                             (Number(watch(`installments.${index}.amount`)) || 0)}
                           readOnly
                           className="text-gray-300 font-medium p-1 w-full"
@@ -1158,7 +1158,7 @@ export default function Form() {
                         </p>
                         <p className='text-gray-600 font-medium ml-1'>
                           {(watch("installments") || []).reduce((acc, curr) => {
-                            const value = (Number(curr.installmentsValue) || 0) * (Number(curr.amount) || 0);
+                            const value = (parseFloat(curr.installmentsValue.replace('.', '').replace(',', '.')) || 0) * (Number(curr.amount) || 0);
                             return acc + value;
                           }, 0)}
                         </p>
