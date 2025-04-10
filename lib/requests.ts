@@ -19,24 +19,56 @@ export async function getOpportunities(id: string): Promise<Opportunity | undefi
         },
       }
     );
+    console.log(response.data.opportunities[0])
     return response.data.opportunities[0];
   } catch (error) {
-    console.error("Erro ao obter as oportinidades", error);
-    throw new Error("Falha ao obter as oportunidades.");
+    console.error("Erro ao obter a oportinidade", error);
+    throw new Error("Falha ao obter a oportunidade.");
   }
 }
 
-export async function getContacts(ContactId: string): Promise<Contact> {
+export async function getContacts(id: string): Promise<Contact> {
+  try {
+    const USERNAME = process.env.NEXT_PUBLIC_HOMIO_API_MIVITA_USER;
+    const PASSWORD = process.env.NEXT_PUBLIC_HOMIO_API_MIVITA_PASS;
+    const response = await mivita.get(
+      `contacts/?id=${id}`,
+      {
+        headers: {
+          Authorization: `Basic ${Buffer.from(`${USERNAME}:${PASSWORD}`).toString("base64")}`
+        }
+      }
+    );
+    console.log(response.data.contact)
+    return response.data.contact;
+  } catch (error) {
+    console.error("Erro ao obter o contato", error);
+    throw new Error("Falha ao obter o contato.");
+  }
+}
+
+export async function postMainContact(contact: proposalSchema) {
   try {
     const USERNAME = process.env.NEXT_PUBLIC_HOMIO_API_MIVITA_USER;
     const PASSWORD = process.env.NEXT_PUBLIC_HOMIO_API_MIVITA_PASS;
     const body = {
-      locationId: process.env.NEXT_PUBLIC_LOCATION_ID_MIVITA,
-      pageLimit: 1,
-      page: 1
+      "name": contact.name,
+      "cpf": contact.cpf,
+      "rg": contact.rg,
+      "nationality": contact.nationality,
+      "maritalStatus": contact.maritalStatus,
+      "birthDate": contact.birthDate,
+      "email": contact.email,
+      "phone": contact.phone,
+      "address": contact.address,
+      "zipCode": contact.zipCode,
+      "city": contact.city,
+      "neighborhood": contact.neighborhood,
+      "state": contact.state
     };
-    const response = await mivita.get(
-      "/contacts/?id=" + ContactId,
+    const response = await mivita.post(
+      "contacts",
+      body,
       {
         headers: {
           Authorization: `Basic ${Buffer.from(`${USERNAME}:${PASSWORD}`).toString("base64")}`
@@ -44,48 +76,140 @@ export async function getContacts(ContactId: string): Promise<Contact> {
         data: body
       }
     );
-    return response.data.contact;
+    return response.data
   } catch (error) {
-    console.error("Erro ao obter os contatos", error);
-    throw new Error("Falha ao obter os contatos.");
+    console.error("Erro ao postar o contato", error);
+    throw new Error("Falha ao postar o contato.");
   }
 }
 
-export async function postNoteToHomio(proposal: proposalSchema, totalProposalValue: number) {
+export async function postSpouseContact(contact: proposalSchema) {
   try {
+    const USERNAME = process.env.NEXT_PUBLIC_HOMIO_API_MIVITA_USER;
+    const PASSWORD = process.env.NEXT_PUBLIC_HOMIO_API_MIVITA_PASS;
     const body = {
-      "homioOpportunityId": proposal.opportunityId,
-      "proposalDate": proposal.proposalDate,
-      "installments": proposal.installments.map((installment) => {
-        return {
-          "type": installment.type,
-          "installmentsValue": installment.installmentsValue,
-          "amount": installment.amount,
-          "totalValue": installment.totalValue,
-          "paymentDate": installment.paymentDate
-        };
-      }),
-      "totalProposalValue": totalProposalValue
+      "name": contact.spouseName,
+      "cpf": contact.spouseCpf,
+      "rg": contact.spouseRg,
+      "nationality": contact.spouseNationality,
+      "email": contact.spouseEmail,
+      "phone": contact.spousePhone,
+      "occupation": contact.spouseOccupation
     };
     const response = await mivita.post(
-      "/proposal-to-homio",
+      "contacts",
       body,
       {
         headers: {
-
-        }
+          Authorization: `Basic ${Buffer.from(`${USERNAME}:${PASSWORD}`).toString("base64")}`
+        },
+        data: body
       }
     );
-    return response
+    return response.data
   } catch (error) {
-    console.error("Erro ao postar a nota", error);
-    throw new Error("Falha ao postar a nota.");
+    console.error("Erro ao postar o contato", error);
+    throw new Error("Falha ao postar o contato.");
   }
 }
 
-export async function postProposal(proposal: proposalSchema) {
+export async function patchMainContact(contactId: string, contact: proposalSchema) {
   try {
+    const USERNAME = process.env.NEXT_PUBLIC_HOMIO_API_MIVITA_USER;
+    const PASSWORD = process.env.NEXT_PUBLIC_HOMIO_API_MIVITA_PASS;
     const body = {
+      "name": contact.name,
+      "cpf": contact.cpf,
+      "rg": contact.rg,
+      "nationality": contact.nationality,
+      "maritalStatus": contact.maritalStatus,
+      "birthDate": contact.birthDate,
+      "email": contact.email,
+      "phone": contact.phone,
+      "address": contact.address,
+      "zipCode": contact.zipCode,
+      "city": contact.city,
+      "neighborhood": contact.neighborhood,
+      "state": contact.state
+    };
+    const response = await mivita.patch(
+      `contacts?id=${contactId}`,
+      body,
+      {
+        headers: {
+          Authorization: `Basic ${Buffer.from(`${USERNAME}:${PASSWORD}`).toString("base64")}`
+        },
+        data: body
+      }
+    );
+    return response.data
+  } catch (error) {
+    console.error("Erro ao atualizar o contato principal", error);
+    throw new Error("Falha ao atualizar o contato principal");
+  }
+}
+
+export async function patchSpouseContact(contactId: string, contact: proposalSchema) {
+  try {
+    const USERNAME = process.env.NEXT_PUBLIC_HOMIO_API_MIVITA_USER;
+    const PASSWORD = process.env.NEXT_PUBLIC_HOMIO_API_MIVITA_PASS;
+    const body = {
+      "name": contact.spouseName,
+      "cpf": contact.spouseCpf,
+      "rg": contact.spouseRg,
+      "nationality": contact.spouseNationality,
+      "email": contact.spouseEmail,
+      "phone": contact.spousePhone,
+      "occupation": contact.spouseOccupation
+    };
+    const response = await mivita.patch(
+      `contacts?id=${contactId}`,
+      body,
+      {
+        headers: {
+          Authorization: `Basic ${Buffer.from(`${USERNAME}:${PASSWORD}`).toString("base64")}`
+        },
+        data: body
+      }
+    );
+    return response.data
+  } catch (error) {
+    console.error("Erro ao atualizar o contato conjuge", error);
+    throw new Error("Falha ao atualizar o contato conjuge.");
+  }
+}
+
+export async function postRelation(opportunityId: string, contactId: string) {
+  try {
+    const USERNAME = process.env.NEXT_PUBLIC_HOMIO_API_MIVITA_USER;
+    const PASSWORD = process.env.NEXT_PUBLIC_HOMIO_API_MIVITA_PASS;
+    const body = {
+      "opportunityId": opportunityId,
+      "spouseId": contactId
+    };
+    const response = await mivita.post(
+      "relations",
+      body,
+      {
+        headers: {
+          Authorization: `Basic ${Buffer.from(`${USERNAME}:${PASSWORD}`).toString("base64")}`
+        },
+        data: body
+      }
+    );
+    return response.data
+  } catch (error) {
+    console.error("Erro ao atualizar a oportunidade", error);
+    throw new Error("Falha ao atualizar a oportunidade.");
+  }
+}
+
+export async function postProposal(proposal: proposalSchema, opportunityName: string, contactId: string, spouseContactId: string, totalProposalValue: number) {
+  try {
+    const USERNAME = process.env.NEXT_PUBLIC_HOMIO_API_MIVITA_USER;
+    const PASSWORD = process.env.NEXT_PUBLIC_HOMIO_API_MIVITA_PASS;
+    const body = {
+      "opportunityName": opportunityName,
       "proposalDate": proposal.proposalDate,
       "building": proposal.building,
       "apartmentUnity": proposal.apartmentUnity,
@@ -94,7 +218,6 @@ export async function postProposal(proposal: proposalSchema) {
       "vendor": proposal.vendor,
       "reserved": proposal.reservedUntill || null,
       "observations": proposal.observations,
-      "contractDate": proposal.contractDate,
       "installments": proposal.installments.map((installment) => {
         return {
           "type": installment.type,
@@ -104,140 +227,33 @@ export async function postProposal(proposal: proposalSchema) {
           "paymentDate": installment.paymentDate
         };
       }),
-      "homioOpportunityId": proposal.opportunityId
+      "totalProposalValue": totalProposalValue,
+      "homioOpportunityId": proposal.opportunityId,
+      "mainContactId": contactId,
+      "spouseContactId": spouseContactId
     };
-    const response = await directus.post(
-      "/mivita_module_proposals",
+    const response = await mivita.post(
+      "proposals",
       body,
       {
         headers: {
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_DIRECTUS_AUTHORIZATION_CODE}`
-        }
-      }
-    );
-    return response.data
-  } catch (error) {
-    console.error("Erro ao postar a proposta", error);
-    throw new Error("Falha ao postar a proposta.");
-  }
-}
-
-export async function postContact(contactId: string, contact: proposalSchema) {
-  try {
-    const body = {
-      "name": contact.name,
-      "cpf": contact.cpf,
-      "rg": contact.rg,
-      "nationality": contact.nationality,
-      "maritalStatus": contact.maritalStatus,
-      "birthDate": contact.birthDate,
-      "email": contact.email,
-      "phone": contact.phone,
-      "address": contact.address,
-      "zipCode": contact.zipCode,
-      "city": contact.city,
-      "neighborhood": contact.neighborhood,
-      "state": contact.state,
-      "spouseName": contact.spouseName,
-      "spouseCpf": contact.spouseCpf,
-      "spouseRg": contact.spouseRg,
-      "spouseNationality": contact.spouseNationality,
-      "spouseOccupation": contact.spouseOccupation,
-      "spouseEmail": contact.spouseEmail,
-      "spousePhone": contact.spousePhone,
-      "homioContactId": contactId,
-    };
-    const response = await directus.post(
-      "/mivita_module_contacts",
-      body,
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_DIRECTUS_AUTHORIZATION_CODE}`
+          Authorization: `Basic ${Buffer.from(`${USERNAME}:${PASSWORD}`).toString("base64")}`
         },
+        data: body
       }
     );
     return response.data
   } catch (error) {
-    console.error("Erro ao postar o contato", error);
-    throw new Error("Falha ao postar o contato.");
+    console.error("Erro ao criar a proposta", error);
+    throw new Error("Falha ao criar a proposta.");
   }
 }
 
-
-export async function postConnection(contactId: string, proposalId: string) {
+export async function patchOpportunity(proposal: proposalSchema) {
   try {
+    const USERNAME = process.env.NEXT_PUBLIC_HOMIO_API_MIVITA_USER;
+    const PASSWORD = process.env.NEXT_PUBLIC_HOMIO_API_MIVITA_PASS;
     const body = {
-      "mivita_module_contacts_id": contactId,
-      "mivita_module_proposals_id": proposalId
-    };
-    const response = await directus.post(
-      "/mivita_module_contacts_mivita_module_proposals",
-      body,
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_DIRECTUS_AUTHORIZATION_CODE}`
-        },
-      }
-    );
-    return response.data
-  } catch (error) {
-    console.error("Erro ao postar o contato", error);
-    throw new Error("Falha ao postar o contato.");
-  }
-}
-
-export async function patchContact(registerId: string, contact: proposalSchema) {
-  try {
-    const body = {
-      "name": contact.name,
-      "cpf": contact.cpf,
-      "rg": contact.rg,
-      "nationality": contact.nationality,
-      "maritalStatus": contact.maritalStatus,
-      "birthDate": contact.birthDate,
-      "email": contact.email,
-      "phone": contact.phone,
-      "address": contact.address,
-      "zipCode": contact.zipCode,
-      "city": contact.city,
-      "neighborhood": contact.neighborhood,
-      "state": contact.state,
-      "spouseName": contact.spouseName,
-      "spouseCpf": contact.spouseCpf,
-      "spouseRg": contact.spouseRg,
-      "spouseNationality": contact.spouseNationality,
-      "spouseOccupation": contact.spouseOccupation,
-      "spouseEmail": contact.spouseEmail,
-      "spousePhone": contact.spousePhone,
-    };
-    const response = await directus.patch(
-      `/mivita_module_contacts/${registerId}`,
-      body,
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_DIRECTUS_AUTHORIZATION_CODE}`
-        },
-      }
-    );
-    return response.data
-  } catch (error) {
-    console.error("Erro ao postar o contato", error);
-    throw new Error("Falha ao postar o contato.");
-  }
-}
-
-export async function patchProposal(registerId: string, proposal: proposalSchema) {
-  try {
-    const body = {
-      "proposalDate": proposal.proposalDate,
-      "building": proposal.building,
-      "apartmentUnity": proposal.apartmentUnity,
-      "floor": proposal.floor,
-      "tower": proposal.tower,
-      "vendor": proposal.vendor,
-      "reserved": proposal.reservedUntill || null,
-      "observations": proposal.observations,
-      "contractDate": proposal.contractDate,
       "installments": proposal.installments.map((installment) => {
         return {
           "type": installment.type,
@@ -248,52 +264,19 @@ export async function patchProposal(registerId: string, proposal: proposalSchema
         };
       })
     };
-    const response = await directus.patch(
-      `/mivita_module_proposals/${registerId}`,
+    const response = await mivita.patch(
+      `opportunities?id=${proposal.opportunityId}`,
       body,
       {
         headers: {
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_DIRECTUS_AUTHORIZATION_CODE}`
-        }
-      }
-    );
-    return response.data
-  } catch (error) {
-    console.error("Erro ao postar a proposta", error);
-    throw new Error("Falha ao postar a proposta.");
-  }
-}
-
-export async function getContact(contactId: string) {
-  try {
-    const response = await directus.get(
-      `/mivita_module_contacts?filter[homioContactId][_eq]=${contactId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_DIRECTUS_AUTHORIZATION_CODE}`
+          Authorization: `Basic ${Buffer.from(`${USERNAME}:${PASSWORD}`).toString("base64")}`
         },
+        data: body
       }
     );
     return response.data
   } catch (error) {
-    console.error("Erro ao pegar o contato", error);
-    throw new Error("Falha ao pegar o contato.");
-  }
-}
-
-export async function getProposal(opportunityId: string) {
-  try {
-    const response = await directus.get(
-      `/mivita_module_proposals?filter[homioOpportunityId][_eq]=${opportunityId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_DIRECTUS_AUTHORIZATION_CODE}`
-        },
-      }
-    );
-    return response.data
-  } catch (error) {
-    console.error("Erro ao pegar o contato", error);
-    throw new Error("Falha ao pegar o contato.");
+    console.error("Erro ao atualizar a oportunidade", error);
+    throw new Error("Falha ao atualizar a oportunidade.");
   }
 }

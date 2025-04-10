@@ -12,7 +12,7 @@ import { Opportunity } from '@/types/opportunityType'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm, SubmitHandler, useFieldArray } from 'react-hook-form'
 import { Button } from "@/components/ui/button";
-import { getOpportunities, getContacts, postProposal, postContact, getContact, postConnection, getProposal, patchProposal, patchContact, postNoteToHomio } from "@/lib/requests"
+import { getOpportunities, getContacts, postMainContact, postSpouseContact, patchMainContact, patchSpouseContact, postRelation, postProposal, patchOpportunity } from "@/lib/requests"
 
 type Inputs = z.infer<typeof FormDataSchema>
 
@@ -32,7 +32,7 @@ const steps = [
   {
     id: '3',
     name: 'Empreendimento',
-    fields: ['building', 'apartmentUnity', 'floor', 'tower', 'vendor', 'reserved', 'observations', 'contractDate'],
+    fields: ['building', 'apartmentUnity', 'floor', 'tower', 'vendor', 'reserved', 'observations'],
     subTitle: 'Confira os dados do empreendimento'
   },
   {
@@ -48,7 +48,9 @@ export default function Form() {
   const [previousStep, setPreviousStep] = useState(0)
   const [currentStep, setCurrentStep] = useState(0)
   const [contactId, setContactId] = useState('')
+  const [spouseId, setSpouseId] = useState('')
   const [opportunityId, setOpportunityId] = useState('')
+  const [opportunityName, setOpportunityName] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [conctactDataOpacity] = useState(0);
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
@@ -74,28 +76,21 @@ export default function Form() {
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     setIsLoading(true)
-    let contact = await getContact(contactId)
-    let proposal = await getProposal(opportunityId)
-    if (contact.data.length > 0) {
-      await patchContact(contact.data[0].id, data)
-      if (proposal.data.length > 0) {
-        await patchProposal(proposal.data[0].id, data)
-      }
-      else {
-        proposal = await postProposal(data)
-        await postConnection(contact.data.id, proposal.data.id)
-      }
-    }
-    else {
-      contact = await postContact(contactId, data)
-      proposal = await postProposal(data)
-      await postConnection(contact.data.id, proposal.data.id)
+    let contact = await getContacts(contactId)
+    let spouseContact = await getContacts(spouseId)
+    contact ? await patchMainContact(contactId, data) : contact = await postMainContact(data)
+    if(spouseContact) {
+      await patchSpouseContact(spouseId, data)
+    } else {
+      spouseContact = await postSpouseContact(data)
+      await postRelation(opportunityId, spouseContact.id)
     }
     const totalProposalValue = (watch("installments") || []).reduce((acc, curr) => {
       const value = (Number(curr.installmentsValue) || 0) * (Number(curr.amount) || 0);
       return acc + value;
     }, 0)
-    await postNoteToHomio(data, totalProposalValue)
+    const proposal = await postProposal(data, opportunityName, contactId, spouseId, totalProposalValue)
+    await patchOpportunity(data)
     setIsLoading(false)
   }
 
@@ -155,10 +150,14 @@ export default function Form() {
     setOpportunityId(opportunityId)
     const opportunity = await getOpportunities(opportunityId)
     if (!opportunity) return;
+    setOpportunityName(opportunity.name)
     const contactId = opportunity.contactId
     setContactId(contactId)
     const contact = await getContacts(contactId)
-    updateLabels(contact, opportunity)
+    const spouseContactId = opportunity.relations.find(item => item.recordId !== opportunity.contactId)?.recordId
+    spouseContactId ? setSpouseId(spouseContactId) : null
+    const spouse = spouseContactId ? await getContacts(spouseContactId) : null
+    updateLabels(contact, spouse, opportunity)
   }
 
   function checkCpf(cpf: string): string {
@@ -178,7 +177,7 @@ export default function Form() {
     }
   }
 
-  function updateLabels(contact: Contact, opportunity: Opportunity) {
+  function updateLabels(contact: Contact, spouse: Contact | null, opportunity: Opportunity) {
     reset({
       name: contact.firstName + ' ' + contact.lastName,
       cpf: checkCpf(contact.customFields.find(item => item.id === 'Z6NSHw77VAORaZKcAQr9')?.value as string),
@@ -199,14 +198,16 @@ export default function Form() {
       zipCode: checkCep(contact.postalCode),
       city: contact.city,
       neighborhood: contact.customFields.find(item => item.id === 'BppzAoRqxsTWpdFcJwam')?.value,
-      state: contact.state,
-      spouseName: contact.customFields.find(item => item.id === 'pkKduZf7cQrfaB7At0qO')?.value,
-      spouseCpf: checkCpf(contact.customFields.find(item => item.id === 'O0n5OIILrSve13ZcFiA0')?.value as string),
-      spouseRg: contact.customFields.find(item => item.id === '2j2YXdg5ND441jRpMohZ')?.value,
-      spouseNationality: contact.customFields.find(item => item.id === 'rUcp7m2vwTP6Rt7d58q4')?.value,
-      spouseOccupation: contact.customFields.find(item => item.id === 'nYaPQ7t2q8gAoelEQq7d')?.value,
-      spouseEmail: contact.customFields.find(item => item.id === 'yYf8GlPPsYiQr0ZVKNNE')?.value,
-      spousePhone: contact.customFields.find(item => item.id === 'hV8KQRdmFjGQuXqPC5Ah')?.value,
+      ...(spouse && {
+        state: spouse.state,
+        spouseName: spouse.firstName + ' ' + spouse.lastName,
+        spouseCpf: checkCpf(spouse.customFields.find(item => item.id === 'Z6NSHw77VAORaZKcAQr9')?.value as string),
+        spouseRg: spouse.customFields.find(item => item.id === 'JZZb9gPOSISid1vp3rHh')?.value,
+        spouseNationality: spouse.customFields.find(item => item.id === '1Xj4odQLI2L5FsXT5jmO')?.value,
+        spouseOccupation: spouse.customFields.find(item => item.id === 'DJAJ8ugEhcq6am3ywUBU')?.value,
+        spouseEmail: spouse.email,
+        spousePhone: spouse.phone,
+      }),
       building: opportunity.customFields.find(item => item.id === 'EVdLCbbyeUrBrMIFmZVX')?.fieldValueArray[0] as
         | "Serena By Mivita"
         | "Lago By Mivita"
@@ -1005,34 +1006,6 @@ export default function Form() {
 
                     </textarea>
                   </div>
-
-                </div>
-                <div className='sm:col-span-2'>
-                  <label
-                    htmlFor='contractDate'
-                    className='block text-sm font-bold leading-6 text-gray-900'
-                  >
-                    Data do Contrato
-                  </label>
-                  <div className='mt-2'>
-
-                    <input
-                      type='date'
-                      id='contractDate'
-                      {...register('contractDate')}
-                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
-                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
-                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
-                    />
-
-
-                    {errors.contractDate?.message && (
-                      <p className='mt-2 text-sm font-medium text-red-400'>
-                        {errors.contractDate.message}
-                      </p>
-                    )}
-                  </div>
-
                 </div>
               </div>
             </motion.div>
@@ -1091,19 +1064,9 @@ export default function Form() {
                           <option className='text-gray-600 font-semibold' value="Mensais">Mensais</option>
                           <option className='text-gray-600 font-semibold' value="Intermediárias">Intermediárias</option>
                           <option className='text-gray-600 font-semibold' value="Anuais">Anuais</option>
-                          <option className='text-gray-600 font-semibold' value="30 dias">30 dias</option>
-                          <option className='text-gray-600 font-semibold' value="60 dias">60 dias</option>
-                          <option className='text-gray-600 font-semibold' value="Contrato">Especial</option>
-                          <option className='text-gray-600 font-semibold' value="90 dias">90 dias</option>
-                          <option className='text-gray-600 font-semibold' value="120 dias">120 dias</option>
-                          <option className='text-gray-600 font-semibold' value="Despesa nacompra (30 ?)">Despesa na compra (30 ?)</option>
-                          <option className='text-gray-600 font-semibold' value="Despesa na compra (60 ?)">Despesa na compra (60 ?)</option>
+                          <option className='text-gray-600 font-semibold' value="30 dias">Semestrais</option>
                           <option className='text-gray-600 font-semibold' value="Bimestrais">Bimestrais</option>
                           <option className='text-gray-600 font-semibold' value="Trimestrais">Trimestrais</option>
-                          <option className='text-gray-600 font-semibold' value="Comissão Apartada">Comissão Apartada</option>
-                          <option className='text-gray-600 font-semibold' value="Permuta">Permuta</option>
-                          <option className='text-gray-600 font-semibold' value="Chaves"> Chaves</option>
-                          <option className='text-gray-600 font-semibold' value="Chaves"> Financiamento</option>
                         </select>
                       </td>
                       <td className="text-gray-300 font-medium p-2">

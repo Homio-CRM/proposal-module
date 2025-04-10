@@ -6,4 +6,7 @@ export type Opportunity = {
       fieldValueString: string;
       fieldValueArray: string[];
     }[];
+    relations: {
+      recordId: string;
+    }[];
   };

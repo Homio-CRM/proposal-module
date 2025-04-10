@@ -32,13 +32,9 @@ export const FormDataSchema = z.object({
   vendor: z.string().min(1, 'Responsável é obrigatório'),
   reservedUntill: z.string().optional(),
   observations: z.string().optional(),
-  contractDate: z.string().min(7, 'Data do contrato é obrigatório'),
   installments: z.array(z.object({
     type: z.enum(['Sinal', 'Parcela única', 'Mensais', 'Intermediárias', 'Anuais',
-      'Financiamento', '30 dias', '60 dias', 'Contrato', 'Especial',
-      '90 dias', '120 dias', 'Despesa na  compra (30 ?)',
-      'Despesa na  compra (60 ?)', 'Bimestrais', 'Trimestrais',
-      'Bienais', 'Trienais', 'Comissão Apartada', 'Permuta', 'Chaves', 'Financiamento'
+      'Semestrais', 'Bimestrais', 'Trimestrais'
     ], { message: 'Condição inválida' }),
     installmentsValue: z.string().min(1, 'Valor é Obrigatório'),
     amount: z.number().min(1, 'Quantidade é Obrigatório'),
