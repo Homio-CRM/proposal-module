@@ -223,7 +223,7 @@ export async function postProposal(proposal: proposalSchema, opportunityName: st
           "type": installment.type,
           "installmentsValue": installment.installmentsValue,
           "amount": installment.amount,
-          "totalValue": installment.totalValue,
+          "totalValue": (parseFloat(installment.installmentsValue) * installment.amount),
           "paymentDate": installment.paymentDate
         };
       }),
