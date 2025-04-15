@@ -1,18 +1,21 @@
 'use client'
 
+import { useSearchParams } from 'next/navigation'
 import React from 'react'
 import Image from 'next/image'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Search } from 'lucide-react'
 import { z } from 'zod'
 import { FormDataSchema } from '@/types/formSchema'
 import { Contact } from '@/types/contactType'
 import { Opportunity } from '@/types/opportunityType'
+import { Proposal } from '@/types/proposalType'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm, SubmitHandler, useFieldArray } from 'react-hook-form'
 import { Button } from "@/components/ui/button";
-import { getOpportunities, getContacts, postMainContact, postSpouseContact, patchMainContact, patchSpouseContact, postRelation, postProposal, patchOpportunity } from "@/lib/requests"
+import { checkCpf, checkCep, checkPaymentFlow } from '@/lib/validations'
+import { getOpportunities, getContacts, postSpouseContact, patchMainContact, patchSpouseContact, postRelation, postProposal, patchOpportunity, getProposal, getDevelopment, getUnit, patchProposal } from "@/lib/requests"
 
 type Inputs = z.infer<typeof FormDataSchema>
 
@@ -26,7 +29,7 @@ const steps = [
   {
     id: '2',
     name: 'Cônjuge',
-    fields: ['spouseName', 'spouseCpf', 'spouseRg', 'spouseNationality', 'spouseOccupation', 'spouseEmail', 'spousePhone'],
+    fields: ['spouseName', 'spouseCpf', 'spouseRg', 'spouseNationality', 'spouseOccupation', 'spouseEmail', 'spousePhone', 'spouseAddress', 'spouseZipCode', 'spouseCity', 'spouseNeighborhood', 'spouseState'],
     subTitle: 'Confira os dados do cônjuge'
   },
   {
@@ -47,20 +50,22 @@ const steps = [
 export default function Form() {
   const [previousStep, setPreviousStep] = useState(0)
   const [currentStep, setCurrentStep] = useState(0)
-  const [contactId, setContactId] = useState('')
-  const [spouseId, setSpouseId] = useState('')
-  const [opportunityId, setOpportunityId] = useState('')
-  const [opportunityName, setOpportunityName] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [conctactDataOpacity] = useState(0);
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
   const [selectAll, setSelectAll] = useState<boolean>(false);
   const delta = currentStep - previousStep
+  const id = useSearchParams().get("recordId")
+  useEffect(() => {
+    if (id) {
+      searchProposal(id);
+    }
+  }, [id]);
 
   const {
     register,
     handleSubmit,
-    reset,
+    setValue,
     trigger,
     control,
     watch,
@@ -76,20 +81,22 @@ export default function Form() {
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     setIsLoading(true)
-    let contact = await getContacts(contactId)
-    let spouseContact = await getContacts(spouseId)
-    contact ? await patchMainContact(contactId, data) : contact = await postMainContact(data)
-    if(spouseContact) {
-      await patchSpouseContact(spouseId, data)
+    await patchMainContact(data)
+    if(data.spouseContactId) {
+      await patchSpouseContact(data)
     } else {
-      spouseContact = await postSpouseContact(data)
-      await postRelation(opportunityId, spouseContact.id)
+      const spouseContact = await postSpouseContact(data)
+      await postRelation(data.opportunityId, spouseContact.id)
     }
     const totalProposalValue = (watch("installments") || []).reduce((acc, curr) => {
       const value = (Number(curr.installmentsValue) || 0) * (Number(curr.amount) || 0);
       return acc + value;
     }, 0)
-    const proposal = await postProposal(data, opportunityName, contactId, spouseId, totalProposalValue)
+    if(data.proposalId) {
+      await patchProposal(data, totalProposalValue)
+    } else {
+      await postProposal(data, totalProposalValue)
+    }
     await patchOpportunity(data)
     setIsLoading(false)
   }
@@ -103,12 +110,15 @@ export default function Form() {
     if (currentStep === steps.length - 1) {
       window.location.reload();
     }
-
     if (!output) return
 
     if (currentStep < steps.length - 1) {
       if (currentStep === steps.length - 2) {
-        await handleSubmit(onSubmit)()
+        try {
+          await handleSubmit(onSubmit)()
+        } catch (error) {
+            console.error("Erro na submissão:", error);
+        }
       }
       setPreviousStep(currentStep)
       setCurrentStep(step => step + 1)
@@ -145,91 +155,145 @@ export default function Form() {
     setSelectAll(false);
   };
 
-  async function updateInformations() {
-    const opportunityId = watch('opportunityId')
-    setOpportunityId(opportunityId)
-    const opportunity = await getOpportunities(opportunityId)
+  async function searchProposal(id: string) {
+    const proposal = await getProposal(id)
+    setValue("proposalId", id)
+    if(!proposal) return;
+    const contactId = proposal.relations.find(item => item.id === "67fd417a21ba9077d3f1c0d4")?.relation.find(item => item.key !== "custom_objects.proposals")?.value as string
+    const spouseId = proposal.relations.find(item => item.id === "67fd5faa21ba903a1b02131e")?.relation.find(item => item.key !== "custom_objects.proposals")?.value as string
+    const developmentId = proposal.relations.find(item => item.id === "67fd413b8eba9e985167762a")?.relation.find(item => item.key !== "custom_objects.proposals")?.value as string
+    const unitId = proposal.relations.find(item => item.id === "67fd604421ba90b14302635f")?.relation.find(item => item.key !== "custom_objects.proposals")?.value as string
+    await searchContacts(contactId, spouseId)
+    await searchDevelopmentAndUnit(developmentId, unitId)
+    await updateProposalLabels(proposal)
+  }
+
+  async function searchOpportunity() {
+    const opportunity = await getOpportunities(watch('opportunityId'))
     if (!opportunity) return;
-    setOpportunityName(opportunity.name)
     const contactId = opportunity.contactId
-    setContactId(contactId)
-    const contact = await getContacts(contactId)
-    const spouseContactId = opportunity.relations.find(item => item.recordId !== opportunity.contactId)?.recordId
-    spouseContactId ? setSpouseId(spouseContactId) : null
+    const spouseId = opportunity.relations.find(item => item.recordId !== opportunity.contactId)?.recordId
+    await searchContacts(contactId, spouseId)
+    await updateProposalLabels(opportunity)
+  }
+
+  async function searchContacts(mainContactId: string, spouseContactId: string| undefined) {
+    const contact = await getContacts(mainContactId)
     const spouse = spouseContactId ? await getContacts(spouseContactId) : null
-    updateLabels(contact, spouse, opportunity)
+    await updateContactsLabels(contact, spouse)
   }
 
-  function checkCpf(cpf: string): string {
-    if (cpf && /^.{11,14}$/.test(cpf)) {
-      cpf = cpf.toString().replace(/\D/g, '')
-      cpf = cpf.toString().replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4')
-    }
-    return cpf
+  async function searchDevelopmentAndUnit(developmentId: string, unitId: string) {
+    const development = await getDevelopment(developmentId)
+    const unit = await getUnit(unitId)
+    await updateDevelopmentAndUnitLabels(development, unit)
   }
 
-  function checkCep(cep: string): string {
-    if (cep && cep.replace(/\D/g, '').length === 8) {
-      return cep.replace(/\D/g, '').replace(/(\d{5})(\d{3})/, '$1-$2')
-    }
-    else {
-      return cep
-    }
+  function updateDevelopmentAndUnitLabels(development: Proposal, unit: Proposal) {
+    setValue(
+      "building",
+      development.properties.name as
+      | "Serena By Mivita"
+      | "Lago By Mivita"
+      | "Stage Praia do Canto"
+      | "Next Jardim da Penha"
+      | "Inside Jardim da Penha"
+      | "Quartzo By Mivita"
+    );
+    setValue("apartmentUnity", unit.properties.name);
   }
 
-  function updateLabels(contact: Contact, spouse: Contact | null, opportunity: Opportunity) {
-    reset({
-      name: contact.firstName + ' ' + contact.lastName,
-      cpf: checkCpf(contact.customFields.find(item => item.id === 'Z6NSHw77VAORaZKcAQr9')?.value as string),
-      rg: contact.customFields.find(item => item.id === 'JZZb9gPOSISid1vp3rHh')?.value,
-      nationality: contact.customFields.find(item => item.id === '1Xj4odQLI2L5FsXT5jmO')?.value,
-      maritalStatus: contact?.customFields.find(item => item.id === 'a5b5vH65cVyb9QxUF5ef')?.value as
+  function updateProposalLabels(param: Proposal | Opportunity): void {
+    if ('properties' in param) {
+      setValue("opportunityId", param.properties.opportunity_id);
+      setValue("opportunityName", param.properties.name);
+      setValue("proposalDate", param.properties.date);
+      setValue("vendor", param.properties.responsable);
+      setValue("reservedUntill", param.properties.reservation_date);
+      setValue("observations", param.properties.observations);
+      setValue("installments", checkPaymentFlow(param.properties.payment_flow))
+    } else {
+      setValue(
+        "building",
+        param.customFields?.find(item => item.id === 'EVdLCbbyeUrBrMIFmZVX')
+          ?.fieldValueArray[0] as
+          | "Serena By Mivita"
+          | "Lago By Mivita"
+          | "Stage Praia do Canto"
+          | "Next Jardim da Penha"
+          | "Inside Jardim da Penha"
+          | "Quartzo By Mivita"
+      );
+      setValue(
+        "vendor",
+        param.customFields.find(item => item.id === 'UxgoVhhSfTrIG9RFaUJ5')
+          ?.fieldValueString as string
+      );
+      setValue("opportunityName", param.name);
+    }
+  }  
+
+  function updateContactsLabels(contact: Contact, spouse: Contact | null) {
+    setValue("mainContactId", contact.id);
+    setValue("name", `${contact.firstName} ${contact.lastName}`);
+    setValue(
+      "cpf",
+      checkCpf(contact.customFields.find(item => item.id === 'Z6NSHw77VAORaZKcAQr9')?.value as string)
+    );
+    setValue("rg", contact.customFields.find(item => item.id === 'JZZb9gPOSISid1vp3rHh')?.value as string);
+    setValue("nationality", contact.customFields.find(item => item.id === '1Xj4odQLI2L5FsXT5jmO')?.value as string);
+    setValue(
+      "maritalStatus",
+      contact.customFields.find(item => item.id === 'a5b5vH65cVyb9QxUF5ef')?.value as
         | "Solteiro(a)"
         | "Casado(a)"
         | "Separado(a)"
         | "Divorciado(a)"
         | "Viúvo(a)"
         | "União Estável"
-        | undefined,
-      birthDate: contact.dateOfBirth,
-      email: contact.email,
-      phone: contact.phone,
-      address: contact.address1 + contact?.customFields.find(item => item.id === 'K8u7EgoKjMRZdq8Mnhku')?.value,
-      zipCode: checkCep(contact.postalCode),
-      city: contact.city,
-      neighborhood: contact.customFields.find(item => item.id === 'BppzAoRqxsTWpdFcJwam')?.value,
-      ...(spouse && {
-        state: spouse.state,
-        spouseName: spouse.firstName + ' ' + spouse.lastName,
-        spouseCpf: checkCpf(spouse.customFields.find(item => item.id === 'Z6NSHw77VAORaZKcAQr9')?.value as string),
-        spouseRg: spouse.customFields.find(item => item.id === 'JZZb9gPOSISid1vp3rHh')?.value,
-        spouseNationality: spouse.customFields.find(item => item.id === '1Xj4odQLI2L5FsXT5jmO')?.value,
-        spouseOccupation: spouse.customFields.find(item => item.id === 'DJAJ8ugEhcq6am3ywUBU')?.value,
-        spouseEmail: spouse.email,
-        spousePhone: spouse.phone,
-      }),
-      building: opportunity.customFields.find(item => item.id === 'EVdLCbbyeUrBrMIFmZVX')?.fieldValueArray[0] as
-        | "Serena By Mivita"
-        | "Lago By Mivita"
-        | "Stage Praia do Canto"
-        | "Next Jardim da Penha"
-        | "Inside Jardim da Penha"
-        | "Quartzo By Mivita"
-        | undefined,
-      apartmentUnity: contact.customFields.find(item => item.id === 'stOGiUa4CDw4mxbo03kU')?.value,
-      floor: contact.customFields.find(item => item.id === '65p4lHnuDMqJFeX2iMBI')?.value,
-      tower: contact.customFields.find(item => item.id === 'CH2ojxtTvuVhbYxzpyME')?.value,
-      vendor: opportunity.customFields.find(item => item.id === 'UxgoVhhSfTrIG9RFaUJ5')?.fieldValueString,
-      reservedUntill: contact.customFields.find(item => item.id === 'jQI7mltRg2JulEJZUYwc')?.value,
-      observations: contact.customFields.find(item => item.id === 'DcFDxA1BhIzMbpedd8Jc')?.value,
-    })
-  }
-
-  // function updateTotalValue() {
-  //   const installmentsValue = watch(installments.installmentsValue)
-  //   const amount = watch(installments.amount)
-  //   setValue('installments.totalValue', installmentsValue * amount)
-  // }
+    );
+    setValue("birthDate", contact.dateOfBirth);
+    setValue("email", contact.email);
+    setValue("phone", contact.phone);
+    setValue("address", contact.address1);
+    setValue("zipCode", checkCep(contact.postalCode));
+    setValue("city", contact.city);
+    setValue("state", contact.state);
+    setValue("neighborhood", contact.customFields.find(item => item.id === 'BppzAoRqxsTWpdFcJwam')?.value as string);
+    setValue("apartmentUnity", contact.customFields.find(item => item.id === 'stOGiUa4CDw4mxbo03kU')?.value as string);
+    setValue("floor", contact.customFields.find(item => item.id === '65p4lHnuDMqJFeX2iMBI')?.value as string);
+    setValue("tower", contact.customFields.find(item => item.id === 'CH2ojxtTvuVhbYxzpyME')?.value as string);
+    setValue("reservedUntill", contact.customFields.find(item => item.id === 'jQI7mltRg2JulEJZUYwc')?.value);
+    setValue("observations", contact.customFields.find(item => item.id === 'DcFDxA1BhIzMbpedd8Jc')?.value);
+    if (spouse) {
+      setValue("spouseContactId", spouse.id);
+      setValue("spouseName", `${spouse.firstName} ${spouse.lastName}`);
+      setValue(
+        "spouseCpf",
+        checkCpf(spouse.customFields.find(item => item.id === 'Z6NSHw77VAORaZKcAQr9')?.value as string)
+      );
+      setValue("spouseRg", spouse.customFields.find(item => item.id === 'JZZb9gPOSISid1vp3rHh')?.value);
+      setValue("spouseNationality", spouse.customFields.find(item => item.id === '1Xj4odQLI2L5FsXT5jmO')?.value);
+      setValue("spouseOccupation", spouse.customFields.find(item => item.id === 'DJAJ8ugEhcq6am3ywUBU')?.value);
+      setValue("spouseEmail", spouse.email);
+      setValue("spousePhone", spouse.phone);
+      setValue(
+        "spouseMaritalStatus",
+        spouse.customFields.find(item => item.id === 'a5b5vH65cVyb9QxUF5ef')?.value as
+          | "Solteiro(a)"
+          | "Casado(a)"
+          | "Separado(a)"
+          | "Divorciado(a)"
+          | "Viúvo(a)"
+          | "União Estável"
+      );
+      setValue("spouseAddress", spouse.address1);
+      setValue("spouseZipCode", checkCep(spouse.postalCode));
+      setValue("spouseCity", spouse.city);
+      setValue("spouseNeighborhood", spouse.customFields.find(item => item.id === 'BppzAoRqxsTWpdFcJwam')?.value as string);
+      setValue("spouseState", spouse.state);
+    }
+  }  
 
   return (
     <>
@@ -283,7 +347,7 @@ export default function Form() {
                     />
 
                     <button type='button'
-                      onClick={updateInformations}
+                      onClick={searchOpportunity}
                       className='p-1.5'>
 
                       <Search className='text-blue-300 p-1' />
@@ -826,7 +890,163 @@ export default function Form() {
                   </div>
 
                 </div>
-              </div>
+                </div>
+                <div className='sm:col-span-2'>
+                  <label
+                    htmlFor='spouseMaritalStatus'
+                    className='block text-sm font-bold leading-6 text-gray-900'
+                  >
+                    Estado Civil
+                  </label>
+                  <div className='mt-2'>
+                    <select
+                      id='spouseMaritalStatus'
+                      {...register('spouseMaritalStatus')}
+                      className='px-3 w-full rounded-md border-0 py-2.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    >
+                      <option value="Solteiro(a)">Solteiro(a)</option>
+                      <option value="Casado(a)">Casado(a)</option>
+                      <option value="Separado(a)">Separado(a)</option>
+                      <option value="Divorciado(a)">Divorciado(a)</option>
+                      <option value="Viúvo(a)">Viúvo(a)</option>
+                      <option value="União Estável">União Estável</option>
+                    </select>
+                    {errors.maritalStatus?.message && (
+                      <p className='mt-2 text-sm font-medium text-red-400'>
+                        {errors.maritalStatus.message}
+                      </p>
+                    )}
+                  </div>
+
+                </div>
+                <div className='sm:col-span-4'>
+                  <label
+                    htmlFor='spouseAddress'
+                    className='block text-sm font-bold leading-6 text-gray-900'
+                  >
+                    Endereço
+                  </label>
+                  <div className='mt-2'>
+                    <input
+                      id='spouseAddress'
+                      type='text'
+                      {...register('spouseAddress')}
+                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    />
+                    {errors.address?.message && (
+                      <p className='mt-2 text-sm font-medium text-red-400'>
+                        {errors.address.message}
+                      </p>
+                    )}
+                  </div>
+
+                </div>
+
+                <div className='sm:col-span-2'>
+                  <label
+                    htmlFor='spouseZipCode'
+                    className='block text-sm font-bold leading-6 text-gray-900'
+                  >
+                    CEP
+                  </label>
+                  <div className='mt-2'>
+                    <input
+                      id='spouseZipCode'
+                      type='text'
+                      {...register('spouseZipCode')}
+                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    />
+                    {errors.zipCode?.message && (
+                      <p className='mt-2 text-sm font-medium text-red-400'>
+                        {errors.zipCode.message}
+                      </p>
+                    )}
+                  </div>
+
+                </div>
+                <div className='sm:col-span-1'></div>
+                <div className='sm:col-span-2'>
+                  <label
+                    htmlFor='spouseCity'
+                    className='block text-sm font-bold leading-6 text-gray-900'
+                  >
+                    Cidade
+                  </label>
+                  <div className='mt-2'>
+                    <input
+                      id='spouseCity'
+                      type='text'
+                      {...register('spouseCity')}
+                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    />
+                    {errors.city?.message && (
+                      <p className='mt-2 text-sm font-medium text-red-400'>
+                        {errors.city.message}
+                      </p>
+                    )}
+                  </div>
+
+                </div>
+
+
+                <div className='sm:col-span-2'>
+                  <label
+                    htmlFor='spouseNeighborhood'
+                    className='block text-sm font-bold leading-6 text-gray-900'
+                  >
+                    Bairro
+                  </label>
+                  <div className='mt-2'>
+                    <input
+                      id='spouseNeighborhood'
+                      type='text'
+                      {...register('spouseNeighborhood')}
+                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    />
+                    {errors.neighborhood?.message && (
+                      <p className='mt-2 text-sm font-medium text-red-400'>
+                        {errors.neighborhood.message}
+                      </p>
+                    )}
+                  </div>
+
+                </div>
+
+
+                <div className='sm:col-span-1'>
+                  <label
+                    htmlFor='spouseState'
+                    className='block text-sm font-bold leading-6 text-gray-900'
+                  >
+                    Estado
+                  </label>
+                  <div className='mt-2'>
+                    <input
+                      id='spouseState'
+                      type='text'
+                      {...register('spouseState')}
+                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    />
+                    {errors.state?.message && (
+                      <p className='mt-2 text-sm font-medium text-red-400'>
+                        {errors.state.message}
+                      </p>
+                    )}
+                  </div>
+
+                </div>
             </motion.div>
           )}
 
@@ -1061,6 +1281,7 @@ export default function Form() {
 
                           <option className='text-gray-600 font-semibold' value="Sinal">Sinal</option>
                           <option className='text-gray-600 font-semibold' value="Parcela única">Parcela única</option>
+                          <option className='text-gray-600 font-semibold' value="Financiamento">Financiamento</option>
                           <option className='text-gray-600 font-semibold' value="Mensais">Mensais</option>
                           <option className='text-gray-600 font-semibold' value="Intermediárias">Intermediárias</option>
                           <option className='text-gray-600 font-semibold' value="Anuais">Anuais</option>
