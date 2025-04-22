@@ -76,7 +76,7 @@ export default function Form() {
     }
     loadUnits()
   }, [id]);
-  
+
   const {
     register,
     handleSubmit,
@@ -95,8 +95,8 @@ export default function Form() {
       setFilteredUnits([])
       return
     }
-    if(!isLoadingUnits) {
-      if(!allUnits.find(item => item.id === currentUnit?.id) && currentUnit) {
+    if (!isLoadingUnits) {
+      if (!allUnits.find(item => item.id === currentUnit?.id) && currentUnit) {
         setAllUnits(allUnits.concat(currentUnit))
         setValue("apartmentUnity", currentUnit.id)
       }
@@ -116,7 +116,7 @@ export default function Form() {
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     setIsLoading(true)
     await patchMainContact(data)
-    if(data.spouseContactId) {
+    if (data.spouseContactId) {
       await patchSpouseContact(data)
     } else {
       const spouseContact = await postSpouseContact(data)
@@ -126,7 +126,7 @@ export default function Form() {
       const value = (Number(curr.installmentsValue) || 0) * (Number(curr.amount) || 0);
       return acc + value;
     }, 0)
-    if(data.proposalId) {
+    if (data.proposalId) {
       await patchProposal(data, totalProposalValue)
     } else {
       await postProposal(data, totalProposalValue)
@@ -151,7 +151,7 @@ export default function Form() {
         try {
           await handleSubmit(onSubmit)()
         } catch (error) {
-            console.error("Erro na submissão:", error);
+          console.error("Erro na submissão:", error);
         }
       }
       setPreviousStep(currentStep)
@@ -193,7 +193,7 @@ export default function Form() {
     setIsLoading(true)
     const proposal = await getProposal(id)
     setValue("proposalId", id)
-    if(!proposal) return;
+    if (!proposal) return;
     const contactId = proposal.relations.find(item => item.id === "67fd417a21ba9077d3f1c0d4")?.relation.find(item => item.key !== "custom_objects.proposals")?.value as string
     const spouseId = proposal.relations.find(item => item.id === "67fd5faa21ba903a1b02131e")?.relation.find(item => item.key !== "custom_objects.proposals")?.value as string
     const developmentId = proposal.relations.find(item => item.id === "67fd413b8eba9e985167762a")?.relation.find(item => item.key !== "custom_objects.proposals")?.value as string
@@ -215,7 +215,7 @@ export default function Form() {
     setIsLoading(false)
   }
 
-  async function searchContacts(mainContactId: string, spouseContactId: string| undefined) {
+  async function searchContacts(mainContactId: string, spouseContactId: string | undefined) {
     const contact = await getContacts(mainContactId)
     const spouse = spouseContactId ? await getContacts(spouseContactId) : null
     await updateContactsLabels(contact, spouse)
@@ -260,12 +260,12 @@ export default function Form() {
         "building",
         param.customFields?.find(item => item.id === 'EVdLCbbyeUrBrMIFmZVX')
           ?.fieldValueArray[0] as
-          | "Serena By Mivita"
-          | "Lago By Mivita"
-          | "Stage Praia do Canto"
-          | "Next Jardim da Penha"
-          | "Inside Jardim da Penha"
-          | "Quartzo By Mivita"
+        | "Serena By Mivita"
+        | "Lago By Mivita"
+        | "Stage Praia do Canto"
+        | "Next Jardim da Penha"
+        | "Inside Jardim da Penha"
+        | "Quartzo By Mivita"
       );
       setValue(
         "vendor",
@@ -274,7 +274,7 @@ export default function Form() {
       );
       setValue("opportunityName", param.name);
     }
-  }  
+  }
 
   function updateContactsLabels(contact: Contact, spouse: Contact | null) {
     setValue("mainContactId", contact.id);
@@ -288,12 +288,12 @@ export default function Form() {
     setValue(
       "maritalStatus",
       contact.customFields.find(item => item.id === 'a5b5vH65cVyb9QxUF5ef')?.value as
-        | "Solteiro(a)"
-        | "Casado(a)"
-        | "Separado(a)"
-        | "Divorciado(a)"
-        | "Viúvo(a)"
-        | "União Estável"
+      | "Solteiro(a)"
+      | "Casado(a)"
+      | "Separado(a)"
+      | "Divorciado(a)"
+      | "Viúvo(a)"
+      | "União Estável"
     );
     setValue("birthDate", contact.dateOfBirth);
     setValue("email", contact.email);
@@ -323,12 +323,12 @@ export default function Form() {
       setValue(
         "spouseMaritalStatus",
         spouse.customFields.find(item => item.id === 'a5b5vH65cVyb9QxUF5ef')?.value as
-          | "Solteiro(a)"
-          | "Casado(a)"
-          | "Separado(a)"
-          | "Divorciado(a)"
-          | "Viúvo(a)"
-          | "União Estável"
+        | "Solteiro(a)"
+        | "Casado(a)"
+        | "Separado(a)"
+        | "Divorciado(a)"
+        | "Viúvo(a)"
+        | "União Estável"
       );
       setValue("spouseAddress", spouse.address1);
       setValue("spouseZipCode", checkCep(spouse.postalCode));
@@ -336,7 +336,7 @@ export default function Form() {
       setValue("spouseNeighborhood", spouse.customFields.find(item => item.id === 'BppzAoRqxsTWpdFcJwam')?.value as string);
       setValue("spouseState", spouse.state);
     }
-  }  
+  }
 
   return (
     <>
@@ -765,7 +765,7 @@ export default function Form() {
             >
               <div className='mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-8'>
 
-                <div className='sm:col-span-4'>
+                <div className='sm:col-span-3'>
                   <label
                     htmlFor='spouseName'
                     className='block text-sm font-bold leading-6 text-gray-900'
@@ -789,7 +789,7 @@ export default function Form() {
                   </div>
 
                 </div>
-                <div className='sm:col-span-2'>
+                <div className='sm:col-span-1'>
                   <label
                     htmlFor='spouseCpf'
                     className='block text-sm font-bold leading-6 text-gray-900'
@@ -813,6 +813,7 @@ export default function Form() {
                   </div>
 
                 </div>
+
                 <div className='sm:col-span-2'>
                   <label
                     htmlFor='spouseRg'
@@ -837,7 +838,8 @@ export default function Form() {
                   </div>
 
                 </div>
-                <div className='sm:col-span-4'>
+                <div className='sm:col-span-1'></div>
+                <div className='sm:col-span-2'>
                   <label
                     htmlFor='spouseNationality'
                     className='block text-sm font-bold leading-6 text-gray-900'
@@ -861,7 +863,37 @@ export default function Form() {
                   </div>
 
                 </div>
-                <div className='sm:col-span-4'>
+                <div className='sm:col-span-2'>
+                  <label
+                    htmlFor='spouseMaritalStatus'
+                    className='block text-sm font-bold leading-6 text-gray-900'
+                  >
+                    Estado Civil
+                  </label>
+                  <div className='mt-2'>
+                    <select
+                      id='spouseMaritalStatus'
+                      {...register('spouseMaritalStatus')}
+                      className='px-3 w-full rounded-md border-0 py-2.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    >
+                      <option value="Solteiro(a)">Solteiro(a)</option>
+                      <option value="Casado(a)">Casado(a)</option>
+                      <option value="Separado(a)">Separado(a)</option>
+                      <option value="Divorciado(a)">Divorciado(a)</option>
+                      <option value="Viúvo(a)">Viúvo(a)</option>
+                      <option value="União Estável">União Estável</option>
+                    </select>
+                    {errors.maritalStatus?.message && (
+                      <p className='mt-2 text-sm font-medium text-red-400'>
+                        {errors.maritalStatus.message}
+                      </p>
+                    )}
+                  </div>
+
+                </div>
+                <div className='sm:col-span-2'>
                   <label
                     htmlFor='spouseOccupation'
                     className='block text-sm font-bold leading-6 text-gray-900'
@@ -933,88 +965,34 @@ export default function Form() {
                   </div>
 
                 </div>
-                </div>
-                <div className='sm:col-span-2'>
-                  <label
-                    htmlFor='spouseMaritalStatus'
-                    className='block text-sm font-bold leading-6 text-gray-900'
-                  >
-                    Estado Civil
-                  </label>
-                  <div className='mt-2'>
-                    <select
-                      id='spouseMaritalStatus'
-                      {...register('spouseMaritalStatus')}
-                      className='px-3 w-full rounded-md border-0 py-2.5 bg-gray-0 text-gray-900 shadow-sm ring-1
-                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
-                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
-                    >
-                      <option value="Solteiro(a)">Solteiro(a)</option>
-                      <option value="Casado(a)">Casado(a)</option>
-                      <option value="Separado(a)">Separado(a)</option>
-                      <option value="Divorciado(a)">Divorciado(a)</option>
-                      <option value="Viúvo(a)">Viúvo(a)</option>
-                      <option value="União Estável">União Estável</option>
-                    </select>
-                    {errors.maritalStatus?.message && (
-                      <p className='mt-2 text-sm font-medium text-red-400'>
-                        {errors.maritalStatus.message}
-                      </p>
-                    )}
-                  </div>
+                <div className='sm:col-span-2'></div>
 
-                </div>
-                <div className='sm:col-span-4'>
+                <div className='sm:col-span-1'>
                   <label
-                    htmlFor='spouseAddress'
+                    htmlFor='spouseState'
                     className='block text-sm font-bold leading-6 text-gray-900'
                   >
-                    Endereço
+                    Estado
                   </label>
                   <div className='mt-2'>
                     <input
-                      id='spouseAddress'
+                      id='spouseState'
                       type='text'
-                      {...register('spouseAddress')}
+                      {...register('spouseState')}
                       className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
                        focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
                        placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
                     />
-                    {errors.address?.message && (
+                    {errors.state?.message && (
                       <p className='mt-2 text-sm font-medium text-red-400'>
-                        {errors.address.message}
+                        {errors.state.message}
                       </p>
                     )}
                   </div>
 
                 </div>
 
-                <div className='sm:col-span-2'>
-                  <label
-                    htmlFor='spouseZipCode'
-                    className='block text-sm font-bold leading-6 text-gray-900'
-                  >
-                    CEP
-                  </label>
-                  <div className='mt-2'>
-                    <input
-                      id='spouseZipCode'
-                      type='text'
-                      {...register('spouseZipCode')}
-                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
-                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
-                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
-                    />
-                    {errors.zipCode?.message && (
-                      <p className='mt-2 text-sm font-medium text-red-400'>
-                        {errors.zipCode.message}
-                      </p>
-                    )}
-                  </div>
-
-                </div>
-                <div className='sm:col-span-1'></div>
-                <div className='sm:col-span-2'>
+                <div className='sm:col-span-1'>
                   <label
                     htmlFor='spouseCity'
                     className='block text-sm font-bold leading-6 text-gray-900'
@@ -1065,31 +1043,42 @@ export default function Form() {
 
                 </div>
 
+                <div className='sm:col-span-2'></div>
 
-                <div className='sm:col-span-1'>
+                <div className='sm:col-span-4'>
                   <label
-                    htmlFor='spouseState'
+                    htmlFor='spouseAddress'
                     className='block text-sm font-bold leading-6 text-gray-900'
                   >
-                    Estado
+                    Endereço
                   </label>
                   <div className='mt-2'>
                     <input
-                      id='spouseState'
+                      id='spouseAddress'
                       type='text'
-                      {...register('spouseState')}
+                      {...register('spouseAddress')}
                       className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
                        focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
                        placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
                     />
-                    {errors.state?.message && (
+                    {errors.address?.message && (
                       <p className='mt-2 text-sm font-medium text-red-400'>
-                        {errors.state.message}
+                        {errors.address.message}
                       </p>
                     )}
                   </div>
 
                 </div>
+
+
+
+              </div>
+
+
+
+
+
+
             </motion.div>
           )}
 
@@ -1133,48 +1122,56 @@ export default function Form() {
                 </div>
                 <div className='sm:col-span-4'></div>
                 <div className="sm:col-span-2">
-                <label
-                  htmlFor="apartmentUnity"
-                  className="block text-sm font-bold leading-6 text-gray-900"
-                >
-                  Unidade
-                </label>
+                  <label
+                    htmlFor="apartmentUnity"
+                    className="block text-sm font-bold leading-6 text-gray-900"
+                  >
+                    Unidade
+                  </label>
 
-                <Controller
-                  name="apartmentUnity"
-                  control={control}
-                  defaultValue={watch("apartmentUnity")}
-                  rules={{ required: 'Selecione uma unidade' }}
-                  render={({ field }) => {
-                    const selectedOption: UnitOption | null =
-                      filteredUnits.find(opt => opt.value === field.value) ?? null
+                  <Controller
+                    name="apartmentUnity"
+                    control={control}
+                    defaultValue={watch("apartmentUnity")}
+                    rules={{ required: 'Selecione uma unidade' }}
+                    render={({ field }) => {
+                      const selectedOption: UnitOption | null =
+                        filteredUnits.find(opt => opt.value === field.value) ?? null
 
-                    return (
-                      <CreatableSelect<
-                        UnitOption,
-                        false,
-                        GroupBase<UnitOption>
-                      >
-                        inputId="apartmentUnity"
-                        options={filteredUnits}
-                        isSearchable
-                        placeholder=""
-                        noOptionsMessage={() => 'Nenhuma opção'}
-                        value={selectedOption}
-                        onChange={(opt: SingleValue<UnitOption>) =>
-                          field.onChange(opt?.value ?? '')
-                        }
-                        onBlur={field.onBlur}
-                      />
-                    )
-                  }}
-                />
-                {errors.apartmentUnity && (
-                  <p className="mt-2 text-sm font-medium text-red-400">
-                    {errors.apartmentUnity.message}
-                  </p>
-                )}
-              </div>
+                      return (
+                        <CreatableSelect<UnitOption, false, GroupBase<UnitOption>>
+                          unstyled
+                          inputId="apartmentUnity"
+                          options={filteredUnits}
+                          isSearchable
+                          placeholder=""
+                          noOptionsMessage={() => 'Nenhuma opção'}
+                          value={selectedOption}
+                          onChange={(opt: SingleValue<UnitOption>) =>
+                            field.onChange(opt?.value ?? '')
+                          }
+                          onBlur={field.onBlur}
+                          classNames={{
+                            control: ({ isFocused }) =>
+                              ` mt-2 px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6 ${isFocused ? 'bg-white' : ''}`,
+                            option: () => "px-4 py-2 hover:bg-gray-100 cursor-pointer font-medium text-sm",
+                            menu: () => "bg-white border mt-1 rounded shadow z-10",
+                            singleValue: () => "text-sm font-medium text-gray-900",
+                            placeholder: () => "text-sm font-medium text-gray-400",
+                          }}
+                        />
+
+                      )
+                    }}
+                  />
+                  {errors.apartmentUnity && (
+                    <p className="mt-2 text-sm font-medium text-red-400">
+                      {errors.apartmentUnity.message}
+                    </p>
+                  )}
+                </div>
                 <div className='sm:col-span-2'>
                   <label
                     htmlFor='floor'
@@ -1446,10 +1443,10 @@ export default function Form() {
               </div>
             </>
           )}
-        </form>
+        </form >
 
         {/* Navigation */}
-        <div className='py-4'>
+        < div className='py-4' >
           <div className='w-full flex justify-end gap-6'>
             <button
               type='button'
@@ -1474,7 +1471,7 @@ export default function Form() {
 
             </button>
           </div>
-        </div>
+        </div >
       </section >
     </>
   )
