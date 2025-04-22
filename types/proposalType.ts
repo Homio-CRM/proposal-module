@@ -11,7 +11,9 @@ export type Proposal = {
         currency: string
       },
       opportunity_id: string,
-      reservation_date: string
+      reservation_date: string,
+      tower: string,
+      floor: string
     };
     relations: {
       id: string;

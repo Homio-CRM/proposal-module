@@ -4,6 +4,7 @@ import { Contact } from "@/types/contactType";
 import { Proposal } from "@/types/proposalType";
 import { FormDataSchema } from "@/types/formSchema";
 import { z } from 'zod'
+import { Units } from "@/types/unitType";
 
 type proposalSchema = z.infer<typeof FormDataSchema>
 
@@ -102,7 +103,7 @@ export async function getUnit(id: string): Promise<Proposal> {
   }
 }
 
-export async function getAvailablesUnits(): Promise<Proposal> {
+export async function getAvailablesUnits(): Promise<Units> {
   try {
     const USERNAME = process.env.NEXT_PUBLIC_HOMIO_API_MIVITA_USER;
     const PASSWORD = process.env.NEXT_PUBLIC_HOMIO_API_MIVITA_PASS;
@@ -371,5 +372,24 @@ export async function patchOpportunity(proposal: proposalSchema) {
   } catch (error) {
     console.error("Erro ao atualizar a oportunidade", error);
     throw new Error("Falha ao atualizar a oportunidade.");
+  }
+}
+
+export async function updateUnitStatus(proposal: proposalSchema) {
+  try {
+    const USERNAME = process.env.NEXT_PUBLIC_HOMIO_API_MIVITA_USER;
+    const PASSWORD = process.env.NEXT_PUBLIC_HOMIO_API_MIVITA_PASS;
+    const response = await mivita.patch(
+      `units/status?id=${proposal.apartmentUnity}`,
+      {
+        headers: {
+          Authorization: `Basic ${Buffer.from(`${USERNAME}:${PASSWORD}`).toString("base64")}`
+        }
+      }
+    );
+    return response.data
+  } catch (error) {
+    console.error("Erro ao atualizar a unidade", error);
+    throw new Error("Falha ao atualizar a unidade.");
   }
 }

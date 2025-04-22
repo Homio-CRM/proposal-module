@@ -12,12 +12,16 @@ import { Contact } from '@/types/contactType'
 import { Opportunity } from '@/types/opportunityType'
 import { Proposal } from '@/types/proposalType'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm, SubmitHandler, useFieldArray } from 'react-hook-form'
-import { Button } from "@/components/ui/button";
+import { useForm, Controller, SubmitHandler, useFieldArray } from 'react-hook-form'
+import { GroupBase, SingleValue } from 'react-select'
+import CreatableSelect from 'react-select/creatable'
+import { Button } from "@/components/ui/button"
 import { checkCpf, checkCep, checkPaymentFlow } from '@/lib/validations'
-import { getOpportunities, getContacts, postSpouseContact, patchMainContact, patchSpouseContact, postRelation, postProposal, patchOpportunity, getProposal, getDevelopment, getUnit, patchProposal } from "@/lib/requests"
+import { getOpportunities, getContacts, postSpouseContact, patchMainContact, patchSpouseContact, postRelation, postProposal, patchOpportunity, getProposal, getDevelopment, getUnit, patchProposal, getAvailablesUnits } from "@/lib/requests"
+import { Unit, Units } from '@/types/unitType'
 
 type Inputs = z.infer<typeof FormDataSchema>
+type UnitOption = { value: string; label: string }
 
 const steps = [
   {
@@ -51,17 +55,28 @@ export default function Form() {
   const [previousStep, setPreviousStep] = useState(0)
   const [currentStep, setCurrentStep] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
-  const [conctactDataOpacity] = useState(0);
-  const [selectedRows, setSelectedRows] = useState<number[]>([]);
-  const [selectAll, setSelectAll] = useState<boolean>(false);
+  const [isLoadingUnits, setIsLoadingUnits] = useState(false)
+  const [conctactDataOpacity] = useState(0)
+  const [allUnits, setAllUnits] = useState<Unit[]>([])
+  const [currentUnit, setCurrentUnit] = useState<Unit>()
+  const [filteredUnits, setFilteredUnits] = useState<UnitOption[]>([])
+  const [selectedRows, setSelectedRows] = useState<number[]>([])
+  const [selectAll, setSelectAll] = useState<boolean>(false)
   const delta = currentStep - previousStep
   const id = useSearchParams().get("recordId")
   useEffect(() => {
     if (id) {
       searchProposal(id);
     }
+    async function loadUnits() {
+      setIsLoadingUnits(true)
+      const availableUnits: Units = await getAvailablesUnits()
+      setAllUnits(availableUnits.units);
+      setIsLoadingUnits(false)
+    }
+    loadUnits()
   }, [id]);
-
+  
   const {
     register,
     handleSubmit,
@@ -73,6 +88,25 @@ export default function Form() {
   } = useForm<Inputs>({
     resolver: zodResolver(FormDataSchema)
   })
+
+  const selectedBuilding = watch('building');
+  useEffect(() => {
+    if (!selectedBuilding) {
+      setFilteredUnits([])
+      return
+    }
+    if(!isLoadingUnits) {
+      if(!allUnits.find(item => item.id === currentUnit?.id) && currentUnit) {
+        setAllUnits(allUnits.concat(currentUnit))
+        setValue("apartmentUnity", currentUnit.id)
+      }
+      setFilteredUnits(
+        allUnits
+          .filter(u => u.development === selectedBuilding)
+          .map(u => ({ value: u.id, label: u.name }))
+      )
+    }
+  }, [selectedBuilding, allUnits])
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -156,6 +190,7 @@ export default function Form() {
   };
 
   async function searchProposal(id: string) {
+    setIsLoading(true)
     const proposal = await getProposal(id)
     setValue("proposalId", id)
     if(!proposal) return;
@@ -166,15 +201,18 @@ export default function Form() {
     await searchContacts(contactId, spouseId)
     await searchDevelopmentAndUnit(developmentId, unitId)
     await updateProposalLabels(proposal)
+    setIsLoading(false)
   }
 
   async function searchOpportunity() {
+    setIsLoading(true)
     const opportunity = await getOpportunities(watch('opportunityId'))
     if (!opportunity) return;
     const contactId = opportunity.contactId
     const spouseId = opportunity.relations.find(item => item.recordId !== opportunity.contactId)?.recordId
     await searchContacts(contactId, spouseId)
     await updateProposalLabels(opportunity)
+    setIsLoading(false)
   }
 
   async function searchContacts(mainContactId: string, spouseContactId: string| undefined) {
@@ -186,10 +224,16 @@ export default function Form() {
   async function searchDevelopmentAndUnit(developmentId: string, unitId: string) {
     const development = await getDevelopment(developmentId)
     const unit = await getUnit(unitId)
-    await updateDevelopmentAndUnitLabels(development, unit)
+    await updateDevelopmentLabels(development)
+    const newUnit: Unit = {
+      id: unit.id,
+      name: unit.properties.name,
+      development: development.properties.name
+    };
+    setCurrentUnit(newUnit)
   }
 
-  function updateDevelopmentAndUnitLabels(development: Proposal, unit: Proposal) {
+  function updateDevelopmentLabels(development: Proposal) {
     setValue(
       "building",
       development.properties.name as
@@ -200,7 +244,6 @@ export default function Form() {
       | "Inside Jardim da Penha"
       | "Quartzo By Mivita"
     );
-    setValue("apartmentUnity", unit.properties.name);
   }
 
   function updateProposalLabels(param: Proposal | Opportunity): void {
@@ -1089,30 +1132,49 @@ export default function Form() {
 
                 </div>
                 <div className='sm:col-span-4'></div>
-                <div className='sm:col-span-2'>
-                  <label
-                    htmlFor='apartmentUnity'
-                    className='block text-sm font-bold leading-6 text-gray-900'
-                  >
-                    Unidade
-                  </label>
-                  <div className='mt-2'>
-                    <input
-                      id='apartmentUnity'
-                      type='text'
-                      {...register('apartmentUnity')}
-                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
-                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
-                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
-                    />
-                    {errors.apartmentUnity?.message && (
-                      <p className='mt-2 text-sm font-medium text-red-400'>
-                        {errors.apartmentUnity.message}
-                      </p>
-                    )}
-                  </div>
+                <div className="sm:col-span-2">
+                <label
+                  htmlFor="apartmentUnity"
+                  className="block text-sm font-bold leading-6 text-gray-900"
+                >
+                  Unidade
+                </label>
 
-                </div>
+                <Controller
+                  name="apartmentUnity"
+                  control={control}
+                  defaultValue={watch("apartmentUnity")}
+                  rules={{ required: 'Selecione uma unidade' }}
+                  render={({ field }) => {
+                    const selectedOption: UnitOption | null =
+                      filteredUnits.find(opt => opt.value === field.value) ?? null
+
+                    return (
+                      <CreatableSelect<
+                        UnitOption,
+                        false,
+                        GroupBase<UnitOption>
+                      >
+                        inputId="apartmentUnity"
+                        options={filteredUnits}
+                        isSearchable
+                        placeholder=""
+                        noOptionsMessage={() => 'Nenhuma opção'}
+                        value={selectedOption}
+                        onChange={(opt: SingleValue<UnitOption>) =>
+                          field.onChange(opt?.value ?? '')
+                        }
+                        onBlur={field.onBlur}
+                      />
+                    )
+                  }}
+                />
+                {errors.apartmentUnity && (
+                  <p className="mt-2 text-sm font-medium text-red-400">
+                    {errors.apartmentUnity.message}
+                  </p>
+                )}
+              </div>
                 <div className='sm:col-span-2'>
                   <label
                     htmlFor='floor'
