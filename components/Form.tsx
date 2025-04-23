@@ -17,7 +17,7 @@ import { GroupBase, SingleValue } from 'react-select'
 import CreatableSelect from 'react-select/creatable'
 import { Button } from "@/components/ui/button"
 import { checkCpf, checkCep, checkPaymentFlow } from '@/lib/validations'
-import { getOpportunities, getContacts, postSpouseContact, patchMainContact, patchSpouseContact, postRelation, postProposal, patchOpportunity, getProposal, getDevelopment, getUnit, patchProposal, getAvailablesUnits } from "@/lib/requests"
+import { getOpportunities, getContacts, postSpouseContact, patchMainContact, patchSpouseContact, postRelation, postProposal, patchOpportunity, getProposal, getDevelopment, getUnit, patchProposal, getAvailablesUnits, updateUnitStatus } from "@/lib/requests"
 import { Unit, Units } from '@/types/unitType'
 import Loading from '@/components/Loading'
 
@@ -97,9 +97,12 @@ export default function Form() {
       return
     }
     if (!isLoadingUnits) {
-      if (!allUnits.find(item => item.id === currentUnit?.id) && currentUnit) {
-        setAllUnits(allUnits.concat(currentUnit))
+      if (currentUnit) {
+        if (!allUnits.find(item => item.id === currentUnit?.id)) {
+          setAllUnits(allUnits.concat(currentUnit))
+        }
         setValue("apartmentUnity", currentUnit.id)
+        console.log("Unidade Carregada")
       }
       setFilteredUnits(
         allUnits
@@ -133,6 +136,7 @@ export default function Form() {
       await postProposal(data, totalProposalValue)
     }
     await patchOpportunity(data)
+    await updateUnitStatus(data)
     setIsLoading(false)
   }
 

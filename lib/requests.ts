@@ -381,6 +381,7 @@ export async function updateUnitStatus(proposal: proposalSchema) {
     const PASSWORD = process.env.NEXT_PUBLIC_HOMIO_API_MIVITA_PASS;
     const response = await mivita.patch(
       `units/status?id=${proposal.apartmentUnity}`,
+      {},
       {
         headers: {
           Authorization: `Basic ${Buffer.from(`${USERNAME}:${PASSWORD}`).toString("base64")}`
