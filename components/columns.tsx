@@ -1,9 +1,9 @@
 "use client"
-import { Apartment } from "@/types/apartmentType";
+import { Unit } from "@/types/unitType";
 import { ColumnDef } from "@tanstack/react-table"
 
 
-export const columns: ColumnDef<Apartment>[] = [
+export const columns: ColumnDef<Unit>[] = [
   {
     accessorKey: "id",
     header: "Unidade",

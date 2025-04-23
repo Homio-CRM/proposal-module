@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button"
 import { checkCpf, checkCep, checkPaymentFlow } from '@/lib/validations'
 import { getOpportunities, getContacts, postSpouseContact, patchMainContact, patchSpouseContact, postRelation, postProposal, patchOpportunity, getProposal, getDevelopment, getUnit, patchProposal, getAvailablesUnits } from "@/lib/requests"
 import { Unit, Units } from '@/types/unitType'
+import Loading from '@/components/Loading'
 
 type Inputs = z.infer<typeof FormDataSchema>
 type UnitOption = { value: string; label: string }
@@ -371,6 +372,7 @@ export default function Form() {
               animate={{ x: 0, opacity: 1 }}
               transition={{ duration: 0.3, ease: 'easeInOut' }}
             >
+              {isLoading ? <Loading /> : ''}
               <div className='mt-6 grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-8'>
                 <div className='sm:col-span-6'>
                   <label
@@ -1088,6 +1090,7 @@ export default function Form() {
               animate={{ x: 0, opacity: 1 }}
               transition={{ duration: 0.3, ease: 'easeInOut' }}
             >
+              {isLoadingUnits ? <Loading /> : ''}
               <div className='mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-8'>
 
                 <div className='sm:col-span-4'>
@@ -1297,6 +1300,7 @@ export default function Form() {
               animate={{ x: 0, opacity: 1 }}
               transition={{ duration: 0.3, ease: 'easeInOut' }}
             >
+              {isLoading ? <Loading /> : ''}
               <div className="w-full flex justify-end">
                 <Button
                   type="button"
@@ -1422,6 +1426,7 @@ export default function Form() {
           )}
           {currentStep === 4 && (
             <>
+
               <div className='mt-12 flex flex-col items-center justify-center'>
                 <div className='flex items-center justify-center rounded-full w-[140px] h-[140px] shadow-[0px_0px_30px_rgba(0,0,0,0)] bg-indigo-500 shadow-indigo-500/60'>
                   <Image width={60} height={60} src='checkmark.svg' alt='Homio Logo'></Image>
