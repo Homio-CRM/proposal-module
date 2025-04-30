@@ -34,7 +34,7 @@ const steps = [
   {
     id: '2',
     name: 'Cônjuge',
-    fields: ['spouseName', 'spouseCpf', 'spouseRg', 'spouseNationality', 'spouseOccupation', 'spouseEmail', 'spousePhone', 'spouseAddress', 'spouseZipCode', 'spouseCity', 'spouseNeighborhood', 'spouseState'],
+    fields: ['spouseName', 'spouseCpf', 'spouseRg', 'spouseNationality', 'spouseOccupation', 'spouseMaritalStatus', 'spouseEmail', 'spousePhone', 'spouseAddress', 'spouseZipCode', 'spouseCity', 'spouseNeighborhood', 'spouseState'],
     subTitle: 'Confira os dados do cônjuge'
   },
   {
@@ -764,6 +764,7 @@ export default function Form() {
           )}
 
           {currentStep === 1 && (
+
             <motion.div
               initial={{ x: delta >= 0 ? '50%' : '-50%', opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
@@ -784,8 +785,8 @@ export default function Form() {
                       type='text'
                       {...register('spouseName')}
                       className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
-                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
-                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                   focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                   placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
                     />
                     {errors.spouseName?.message && (
                       <p className='mt-2 text-sm font-medium text-red-400'>
@@ -808,8 +809,8 @@ export default function Form() {
                       type='text'
                       {...register('spouseCpf')}
                       className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
-                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
-                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                   focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                   placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
                     />
                     {errors.spouseCpf?.message && (
                       <p className='mt-2 text-sm font-medium text-red-400'>
@@ -833,8 +834,8 @@ export default function Form() {
                       type='text'
                       {...register('spouseRg')}
                       className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
-                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
-                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                   focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                   placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
                     />
                     {errors.spouseRg?.message && (
                       <p className='mt-2 text-sm font-medium text-red-400'>
@@ -858,8 +859,8 @@ export default function Form() {
                       type='text'
                       {...register('spouseNationality')}
                       className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
-                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
-                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                   focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                   placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
                     />
                     {errors.spouseNationality?.message && (
                       <p className='mt-2 text-sm font-medium text-red-400'>
@@ -881,8 +882,8 @@ export default function Form() {
                       id='spouseMaritalStatus'
                       {...register('spouseMaritalStatus')}
                       className='px-3 w-full rounded-md border-0 py-2.5 bg-gray-0 text-gray-900 shadow-sm ring-1
-                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
-                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                   focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                   placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
                     >
                       <option value="Solteiro(a)">Solteiro(a)</option>
                       <option value="Casado(a)">Casado(a)</option>
@@ -891,9 +892,9 @@ export default function Form() {
                       <option value="Viúvo(a)">Viúvo(a)</option>
                       <option value="União Estável">União Estável</option>
                     </select>
-                    {errors.maritalStatus?.message && (
+                    {errors.spouseMaritalStatus?.message && (
                       <p className='mt-2 text-sm font-medium text-red-400'>
-                        {errors.maritalStatus.message}
+                        {errors.spouseMaritalStatus.message}
                       </p>
                     )}
                   </div>
@@ -912,8 +913,8 @@ export default function Form() {
                       type='text'
                       {...register('spouseOccupation')}
                       className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
-                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
-                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                   focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                   placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
                     />
                     {errors.spouseOccupation?.message && (
                       <p className='mt-2 text-sm font-medium text-red-400'>
@@ -925,7 +926,7 @@ export default function Form() {
                 </div>
                 <div className='sm:col-span-4'>
                   <label
-                    htmlFor='spouceOcuppation'
+                    htmlFor='spouseEmail'
                     className='block text-sm font-bold leading-6 text-gray-900'
                   >
                     Email
@@ -936,8 +937,8 @@ export default function Form() {
                       type='text'
                       {...register('spouseEmail')}
                       className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
-                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
-                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                   focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                   placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
                     />
                     {errors.spouseEmail?.message && (
                       <p className='mt-2 text-sm font-medium text-red-400'>
@@ -949,7 +950,7 @@ export default function Form() {
                 </div>
                 <div className='sm:col-span-2'>
                   <label
-                    htmlFor='spouceOcuppation'
+                    htmlFor='spousePhone'
                     className='block text-sm font-bold leading-6 text-gray-900'
                   >
                     Telefone
@@ -960,8 +961,8 @@ export default function Form() {
                       type='text'
                       {...register('spousePhone')}
                       className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
-                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
-                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                   focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                   placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
                     />
                     {errors.spousePhone?.message && (
                       <p className='mt-2 text-sm font-medium text-red-400'>
@@ -986,12 +987,12 @@ export default function Form() {
                       type='text'
                       {...register('spouseState')}
                       className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
-                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
-                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                   focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                   placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
                     />
-                    {errors.state?.message && (
+                    {errors.spouseState?.message && (
                       <p className='mt-2 text-sm font-medium text-red-400'>
-                        {errors.state.message}
+                        {errors.spouseState.message}
                       </p>
                     )}
                   </div>
@@ -1011,12 +1012,12 @@ export default function Form() {
                       type='text'
                       {...register('spouseCity')}
                       className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
-                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
-                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                   focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                   placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
                     />
-                    {errors.city?.message && (
+                    {errors.spouseCity?.message && (
                       <p className='mt-2 text-sm font-medium text-red-400'>
-                        {errors.city.message}
+                        {errors.spouseCity.message}
                       </p>
                     )}
                   </div>
@@ -1037,19 +1038,43 @@ export default function Form() {
                       type='text'
                       {...register('spouseNeighborhood')}
                       className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
-                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
-                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                   focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                   placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
                     />
-                    {errors.neighborhood?.message && (
+                    {errors.spouseNeighborhood?.message && (
                       <p className='mt-2 text-sm font-medium text-red-400'>
-                        {errors.neighborhood.message}
+                        {errors.spouseNeighborhood.message}
+                      </p>
+                    )}
+                  </div>
+
+                </div>
+                <div className='sm:col-span-1'>
+                  <label
+                    htmlFor='spouseZipCode'
+                    className='block text-sm font-bold leading-6 text-gray-900'
+                  >
+                    CEP
+                  </label>
+                  <div className='mt-2'>
+                    <input
+                      id='spouseZipCode'
+                      type='text'
+                      {...register('spouseZipCode')}
+                      className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
+                   focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                   placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                    />
+                    {errors.spouseZipCode?.message && (
+                      <p className='mt-2 text-sm font-medium text-red-400'>
+                        {errors.spouseZipCode.message}
                       </p>
                     )}
                   </div>
 
                 </div>
 
-                <div className='sm:col-span-2'></div>
+
 
                 <div className='sm:col-span-4'>
                   <label
@@ -1064,12 +1089,12 @@ export default function Form() {
                       type='text'
                       {...register('spouseAddress')}
                       className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
-                       focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
-                       placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
+                   focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
+                   placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
                     />
-                    {errors.address?.message && (
+                    {errors.spouseAddress?.message && (
                       <p className='mt-2 text-sm font-medium text-red-400'>
-                        {errors.address.message}
+                        {errors.spouseAddress.message}
                       </p>
                     )}
                   </div>
