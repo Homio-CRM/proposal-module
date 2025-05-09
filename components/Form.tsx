@@ -102,7 +102,6 @@ export default function Form() {
           setAllUnits(allUnits.concat(currentUnit))
         }
         setValue("apartmentUnity", currentUnit.id)
-        console.log("Unidade Carregada")
       }
       setFilteredUnits(
         allUnits
@@ -205,8 +204,8 @@ export default function Form() {
     const unitId = proposal.relations.find(item => item.id === "67fd604421ba90b14302635f")?.relation.find(item => item.key !== "custom_objects.proposals")?.value as string
     await searchContacts(contactId, spouseId)
     await searchDevelopmentAndUnit(developmentId, unitId)
-    await updateProposalLabels(proposal)
     setIsLoading(false)
+    await updateProposalLabels(proposal)
   }
 
   async function searchOpportunity() {
@@ -216,8 +215,8 @@ export default function Form() {
     const contactId = opportunity.contactId
     const spouseId = opportunity.relations.find(item => item.recordId !== opportunity.contactId)?.recordId
     await searchContacts(contactId, spouseId)
-    await updateProposalLabels(opportunity)
     setIsLoading(false)
+    await updateProposalLabels(opportunity)
   }
 
   async function searchContacts(mainContactId: string, spouseContactId: string | undefined) {
