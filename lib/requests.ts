@@ -265,7 +265,7 @@ export async function postProposal(proposal: proposalSchema, totalProposalValue:
       "floor": proposal.floor,
       "tower": proposal.tower,
       "vendor": proposal.vendor,
-      "reserved": proposal.reservedUntill || null,
+      "reserved": proposal.reservedUntill,
       "observations": proposal.observations,
       "installments": proposal.installments.map((installment) => {
         return {
@@ -310,7 +310,7 @@ export async function patchProposal(proposal: proposalSchema, totalProposalValue
       "floor": proposal.floor,
       "tower": proposal.tower,
       "vendor": proposal.vendor,
-      "reserved": proposal.reservedUntill || null,
+      "reserved": proposal.reservedUntill,
       "observations": proposal.observations,
       "installments": proposal.installments.map((installment) => {
         return {
@@ -327,7 +327,7 @@ export async function patchProposal(proposal: proposalSchema, totalProposalValue
       "spouseContactId": proposal.spouseContactId
     };
     const response = await mivita.patch(
-      `proposals?id=${proposal.proposalId}`,
+      `patch-proposals?id=${proposal.proposalId}`,
       body,
       {
         headers: {
@@ -338,8 +338,8 @@ export async function patchProposal(proposal: proposalSchema, totalProposalValue
     );
     return response.data
   } catch (error) {
-    console.error("Erro ao criar a proposta", error);
-    throw new Error("Falha ao criar a proposta.");
+    console.error("Erro ao atualizar a proposta", error);
+    throw new Error("Falha ao atualizar a proposta.");
   }
 }
 
