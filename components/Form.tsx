@@ -1376,7 +1376,7 @@ export default function Form() {
                           <option className='text-gray-600 font-semibold' value="Mensais">Mensais</option>
                           <option className='text-gray-600 font-semibold' value="Intermediárias">Intermediárias</option>
                           <option className='text-gray-600 font-semibold' value="Anuais">Anuais</option>
-                          <option className='text-gray-600 font-semibold' value="30 dias">Semestrais</option>
+                          <option className='text-gray-600 font-semibold' value="Semestrais">Semestrais</option>
                           <option className='text-gray-600 font-semibold' value="Bimestrais">Bimestrais</option>
                           <option className='text-gray-600 font-semibold' value="Trimestrais">Trimestrais</option>
                         </select>
