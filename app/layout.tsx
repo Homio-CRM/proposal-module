@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local"
 import 'material-icons/iconfont/material-icons.css';
 import "./globals.css";
+import { UserDataProvider } from '@/lib/contexts/UserDataContext'
 
 export const metadata: Metadata = {
   title: "Gerenciador de Propostas",
@@ -64,7 +65,9 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body className={` ${helvetica.variable} font-sans`}>
-        {children}
+        <UserDataProvider>
+          {children}
+        </UserDataProvider>
       </body>
     </html>
   );
