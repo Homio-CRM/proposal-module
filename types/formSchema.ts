@@ -28,6 +28,7 @@ export const FormDataSchema = z.object({
   neighborhood: z.string().min(1, 'Bairro é obrigatório'),
   city: z.string().min(1, 'Cidade é obrigatório'),
   state: z.string().min(1, 'Estado é obrigatório'),
+  occupation: z.string().min(1, 'Profissão é obrigatório'),
 
   // Spouse fields: optional, but if provided must respect formatting
   spouseName: z.string().optional(),

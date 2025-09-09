@@ -172,6 +172,7 @@ export async function patchMainContact(contact: proposalSchema) {
       "phone": contact.phone,
       "address": contact.address,
       "zipCode": contact.zipCode,
+      "occupation": contact.occupation,
       "city": contact.city,
       "neighborhood": contact.neighborhood,
       "state": contact.state
