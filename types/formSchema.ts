@@ -30,25 +30,24 @@ export const FormDataSchema = z.object({
   state: z.string().min(1, 'Estado é obrigatório'),
   occupation: z.string().min(1, 'Profissão é obrigatório'),
 
-  // Spouse fields: optional, but if provided must respect formatting
   spouseName: z.string().optional(),
   spouseCpf: z.string().optional().refine(
-    (v) => typeof v === 'string' ? (v === '' || cpfRegex.test(v)) : true,
-    { message: 'CPF do cônjuge deve ser formatado como: 000.000.000-00' }
+    v => typeof v === 'string' ? (v === '' || cpfRegex.test(v)) : true,
+    'CPF do cônjuge deve ser formatado como: 000.000.000-00'
   ),
   spouseRg: z.string().optional().refine(
-    (v) => typeof v === 'string' ? (v === '' || v.length >= 7) : true,
-    { message: 'RG do cônjuge deve ter no mínimo 7 caracteres' }
+    v => typeof v === 'string' ? (v === '' || v.length >= 7) : true,
+    'RG do cônjuge deve ter no mínimo 7 caracteres'
   ),
   spouseNationality: z.string().optional(),
   spouseOccupation: z.string().optional(),
   spouseEmail: z.string().optional().refine(
-    (v) => typeof v === 'string' ? (v === '' || emailRegex.test(v)) : true,
-    { message: 'Email do cônjuge deve ser formatado como exemplo@exemplo.com' }
+    v => typeof v === 'string' ? (v === '' || emailRegex.test(v)) : true,
+    'Email do cônjuge deve ser formatado como exemplo@exemplo.com'
   ),
   spousePhone: z.string().optional().refine(
-    (v) => typeof v === 'string' ? (v === '' || v.length >= 7) : true,
-    { message: 'Telefone do cônjuge deve ter no mínimo 7 dígitos' }
+    v => typeof v === 'string' ? (v === '' || v.length >= 7) : true,
+    'Telefone do cônjuge deve ter no mínimo 7 dígitos'
   ),
   spouseMaritalStatus: z.enum(
     ['Solteiro(a)', 'Casado(a)', 'Separado(a)', 'Divorciado(a)', 'Viúvo(a)', 'União Estável'],
@@ -56,8 +55,8 @@ export const FormDataSchema = z.object({
   ).optional(),
   spouseAddress: z.string().optional(),
   spouseZipCode: z.string().optional().refine(
-    (v) => typeof v === 'string' ? (v === '' || zipRegex.test(v)) : true,
-    { message: 'Cep do cônjuge deve ser formatado como: 00000-000' }
+    v => typeof v === 'string' ? (v === '' || zipRegex.test(v)) : true,
+    'Cep do cônjuge deve ser formatado como: 00000-000'
   ),
   spouseNeighborhood: z.string().optional(),
   spouseCity: z.string().optional(),
@@ -89,8 +88,8 @@ export const FormDataSchema = z.object({
   ),
 
   opportunityId: z.string().min(1, 'Id da oportunidade é obrigatório'),
-  opportunityName: z.string(),
-  mainContactId: z.string(),
+  opportunityName: z.string().min(1, 'Nome da oportunidade é obrigatório'),
+  mainContactId: z.string().min(1, 'Id do contato principal é obrigatório'),
   spouseContactId: z.string().optional(),
   proposalId: z.string().optional(),
 })

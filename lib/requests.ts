@@ -51,7 +51,7 @@ export async function getProposal(id: string): Promise<Proposal | undefined> {
     const USERNAME = process.env.NEXT_PUBLIC_HOMIO_API_MIVITA_USER;
     const PASSWORD = process.env.NEXT_PUBLIC_HOMIO_API_MIVITA_PASS;
     const response = await mivita.get(
-      `proposals/?id=${id}`,
+      `proposals/list/?id=${id}`,
       {
         headers: {
           Authorization: `Basic ${Buffer.from(`${USERNAME}:${PASSWORD}`).toString("base64")}`
@@ -328,7 +328,7 @@ export async function patchProposal(proposal: proposalSchema, totalProposalValue
       "spouseContactId": proposal.spouseContactId
     };
     const response = await mivita.patch(
-      `patch-proposals?id=${proposal.proposalId}`,
+      `proposals/update?id=${proposal.proposalId}`,
       body,
       {
         headers: {
