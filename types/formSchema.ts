@@ -10,7 +10,7 @@ export const FormDataSchema = z.object({
   cpf: z.string()
     .min(11, 'CPF é obrigatório')
     .regex(cpfRegex, 'CPF deve ser formatado como: 000.000.000-00'),
-  rg: z.string().min(7, 'RG é obrigatório'),
+  rg: z.string().optional(),
   phone: z.string().min(7, 'Telefone é obrigatório'),
   email: z.string()
     .min(1, 'Email é obrigatório')

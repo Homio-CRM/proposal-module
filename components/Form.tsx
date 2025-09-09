@@ -16,7 +16,7 @@ import { useForm, Controller, SubmitHandler, useFieldArray } from 'react-hook-fo
 import { GroupBase, SingleValue } from 'react-select'
 import CreatableSelect from 'react-select/creatable'
 import { Button } from "@/components/ui/button"
-import { checkCpf, checkCep, checkPaymentFlow } from '@/lib/validations'
+import { checkCpf, checkCep, checkPaymentFlow, formatCpfInput, formatCepInput } from '@/lib/validations'
 import { getOpportunities, getContacts, postSpouseContact, patchMainContact, patchSpouseContact, postRelation, postProposal, patchOpportunity, getProposal, getDevelopment, getUnit, patchProposal, getAvailablesUnits, updateUnitStatus } from "@/lib/requests"
 import { Unit, Units } from '@/types/unitType'
 import Loading from '@/components/Loading'
@@ -469,7 +469,8 @@ export default function Form() {
                     <input
                       id='cpf'
                       type='text'
-                      {...register('cpf')}
+                      value={watch('cpf') || ''}
+                      onChange={(e) => setValue('cpf', formatCpfInput(e.target.value))}
                       className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
                        focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
                        placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
@@ -693,7 +694,8 @@ export default function Form() {
                     <input
                       id='zipCode'
                       type='text'
-                      {...register('zipCode')}
+                      value={watch('zipCode') || ''}
+                      onChange={(e) => setValue('zipCode', formatCepInput(e.target.value))}
                       className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
                        focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
                        placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
@@ -831,7 +833,8 @@ export default function Form() {
                     <input
                       id='spouseCpf'
                       type='text'
-                      {...register('spouseCpf')}
+                      value={watch('spouseCpf') || ''}
+                      onChange={(e) => setValue('spouseCpf', formatCpfInput(e.target.value))}
                       className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
                    focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
                    placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
@@ -1084,7 +1087,8 @@ export default function Form() {
                     <input
                       id='spouseZipCode'
                       type='text'
-                      {...register('spouseZipCode')}
+                      value={watch('spouseZipCode') || ''}
+                      onChange={(e) => setValue('spouseZipCode', formatCepInput(e.target.value))}
                       className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
                    focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
                    placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
