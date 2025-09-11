@@ -1,8 +1,8 @@
 import { Installment } from "@/types/installmentType"
 
 export function checkCpf(cpf: string): string {
-  if (cpf && /^.{11,14}$/.test(cpf)) {
-    cpf = cpf.toString().replace(/\D/g, '')
+  if (cpf && /^.{11,14}$/.test(cpf.trim())) {
+    cpf = cpf.toString().trim().replace(/\D/g, '')
     cpf = cpf.toString().replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4')
   }
   return cpf
@@ -67,7 +67,7 @@ export function checkPaymentFlow(paymentFlow: string): Installment[] {
 }
 
 export function formatCpfInput(input: string): string {
-  const digits = (input || '').replace(/\D/g, '').slice(0, 11)
+  const digits = (input || '').trim().replace(/\D/g, '').slice(0, 11)
   if (digits.length <= 3) {
     return digits
   }

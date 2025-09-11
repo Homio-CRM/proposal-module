@@ -65,18 +65,6 @@ export default function Form() {
   const [selectAll, setSelectAll] = useState<boolean>(false)
   const delta = currentStep - previousStep
   const id = useSearchParams().get("recordId")
-  useEffect(() => {
-    if (id) {
-      searchProposal(id);
-    }
-    async function loadUnits() {
-      setIsLoadingUnits(true)
-      const availableUnits: Units = await getAvailablesUnits()
-      setAllUnits(availableUnits.units);
-      setIsLoadingUnits(false)
-    }
-    loadUnits()
-  }, [id]);
 
   const {
     register,
@@ -89,6 +77,158 @@ export default function Form() {
   } = useForm<Inputs>({
     resolver: zodResolver(FormDataSchema)
   })
+
+  useEffect(() => {
+    async function searchContacts(mainContactId: string, spouseContactId: string | undefined) {
+      const contact = await getContacts(mainContactId)
+      const spouse = spouseContactId ? await getContacts(spouseContactId) : null
+      await updateContactsLabels(contact, spouse)
+    }
+
+    async function searchDevelopmentAndUnit(developmentId: string, unitId: string) {
+      const development = await getDevelopment(developmentId)
+      const unit = await getUnit(unitId)
+      await updateDevelopmentLabels(development)
+      const newUnit: Unit = {
+        id: unit.id,
+        name: unit.properties.name,
+        development: development.properties.name
+      };
+      setCurrentUnit(newUnit)
+    }
+
+    function updateDevelopmentLabels(development: Proposal) {
+      setValue(
+        "building",
+        development.properties.name as
+        | "Serena By Mivita"
+        | "Lago By Mivita"
+        | "Stage Praia do Canto"
+        | "Next Jardim da Penha"
+        | "Inside Jardim da Penha"
+        | "Quartzo By Mivita"
+      );
+    }
+
+    function updateProposalLabels(param: Proposal | Opportunity): void {
+      if ('properties' in param) {
+        setValue("opportunityId", param.properties.opportunity_id);
+        setValue("opportunityName", param.properties.name);
+        setValue("proposalDate", param.properties.date);
+        setValue("vendor", param.properties.responsable);
+        setValue("reservedUntill", param.properties.reservation_date);
+        setValue("observations", param.properties.observations);
+        setValue("installments", checkPaymentFlow(param.properties.payment_flow))
+      } else {
+        setValue(
+          "building",
+          param.customFields?.find(item => item.id === 'EVdLCbbyeUrBrMIFmZVX')
+            ?.fieldValueArray[0] as
+          | "Serena By Mivita"
+          | "Lago By Mivita"
+          | "Stage Praia do Canto"
+          | "Next Jardim da Penha"
+          | "Inside Jardim da Penha"
+          | "Quartzo By Mivita"
+        );
+        setValue(
+          "vendor",
+          param.customFields.find(item => item.id === 'UxgoVhhSfTrIG9RFaUJ5')
+            ?.fieldValueString as string
+        );
+        setValue("opportunityName", param.name);
+      }
+    }
+
+    function updateContactsLabels(contact: Contact, spouse: Contact | null) {
+      setValue("mainContactId", contact.id);
+      setValue("name", `${contact.firstName} ${contact.lastName}`);
+      setValue(
+        "cpf",
+        checkCpf(contact.customFields.find(item => item.id === 'Z6NSHw77VAORaZKcAQr9')?.value as string)
+      );
+      setValue("rg", contact.customFields.find(item => item.id === 'JZZb9gPOSISid1vp3rHh')?.value as string);
+      setValue("nationality", contact.customFields.find(item => item.id === '1Xj4odQLI2L5FsXT5jmO')?.value as string);
+      setValue(
+        "maritalStatus",
+        contact.customFields.find(item => item.id === 'a5b5vH65cVyb9QxUF5ef')?.value as
+        | "Solteiro(a)"
+        | "Casado(a)"
+        | "Separado(a)"
+        | "Divorciado(a)"
+        | "Viúvo(a)"
+        | "União Estável"
+      );
+      setValue("birthDate", contact.dateOfBirth);
+      setValue("email", contact.email);
+      setValue("phone", contact.phone);
+      setValue("occupation", contact.customFields.find(item => item.id === 'DJAJ8ugEhcq6am3ywUBU')?.value as string);
+      setValue("address", contact.address1);
+      setValue("zipCode", checkCep(contact.postalCode));
+      setValue("city", contact.city);
+      setValue("state", contact.state);
+      setValue("neighborhood", contact.customFields.find(item => item.id === 'BppzAoRqxsTWpdFcJwam')?.value as string);
+      setValue("apartmentUnity", contact.customFields.find(item => item.id === 'stOGiUa4CDw4mxbo03kU')?.value as string);
+      setValue("floor", contact.customFields.find(item => item.id === '65p4lHnuDMqJFeX2iMBI')?.value as string);
+      setValue("tower", contact.customFields.find(item => item.id === 'CH2ojxtTvuVhbYxzpyME')?.value as string);
+      setValue("reservedUntill", contact.customFields.find(item => item.id === 'jQI7mltRg2JulEJZUYwc')?.value);
+      setValue("observations", contact.customFields.find(item => item.id === 'DcFDxA1BhIzMbpedd8Jc')?.value);
+      if (spouse) {
+        setValue("spouseContactId", spouse.id);
+        setValue("spouseName", `${spouse.firstName} ${spouse.lastName}`);
+        setValue(
+          "spouseCpf",
+          checkCpf(spouse.customFields.find(item => item.id === 'Z6NSHw77VAORaZKcAQr9')?.value as string)
+        );
+        setValue("spouseRg", spouse.customFields.find(item => item.id === 'JZZb9gPOSISid1vp3rHh')?.value);
+        setValue("spouseNationality", spouse.customFields.find(item => item.id === '1Xj4odQLI2L5FsXT5jmO')?.value);
+        setValue("spouseOccupation", spouse.customFields.find(item => item.id === 'DJAJ8ugEhcq6am3ywUBU')?.value);
+        setValue("spouseEmail", spouse.email);
+        setValue("spousePhone", spouse.phone);
+        setValue(
+          "spouseMaritalStatus",
+          spouse.customFields.find(item => item.id === 'a5b5vH65cVyb9QxUF5ef')?.value as
+          | "Solteiro(a)"
+          | "Casado(a)"
+          | "Separado(a)"
+          | "Divorciado(a)"
+          | "Viúvo(a)"
+          | "União Estável"
+        );
+        setValue("spouseAddress", spouse.address1);
+        setValue("spouseZipCode", checkCep(spouse.postalCode));
+        setValue("spouseCity", spouse.city);
+        setValue("spouseNeighborhood", spouse.customFields.find(item => item.id === 'BppzAoRqxsTWpdFcJwam')?.value as string);
+        setValue("spouseState", spouse.state);
+      }
+    }
+
+    async function searchProposal(id: string) {
+      setIsLoading(true)
+      const proposal = await getProposal(id)
+      setValue("proposalId", id)
+      if (!proposal) return;
+      const contactId = proposal.relations.find(item => item.id === "67fd417a21ba9077d3f1c0d4")?.relation.find(item => item.key !== "custom_objects.proposals")?.value as string
+      const spouseId = proposal.relations.find(item => item.id === "67fd5faa21ba903a1b02131e")?.relation.find(item => item.key !== "custom_objects.proposals")?.value as string
+      const developmentId = proposal.relations.find(item => item.id === "67fd413b8eba9e985167762a")?.relation.find(item => item.key !== "custom_objects.proposals")?.value as string
+      const unitId = proposal.relations.find(item => item.id === "67fd604421ba90b14302635f")?.relation.find(item => item.key !== "custom_objects.proposals")?.value as string
+      await searchContacts(contactId, spouseId)
+      await searchDevelopmentAndUnit(developmentId, unitId)
+      setIsLoading(false)
+      await updateProposalLabels(proposal)
+    }
+
+    if (id) {
+      searchProposal(id);
+    }
+    async function loadUnits() {
+      setIsLoadingUnits(true)
+      const availableUnits: Units = await getAvailablesUnits()
+      setAllUnits(availableUnits.units);
+      setIsLoadingUnits(false)
+    }
+    loadUnits()
+  }, [id, setValue]);
 
   const selectedBuilding = watch('building');
   useEffect(() => {
@@ -109,7 +249,7 @@ export default function Form() {
           .map(u => ({ value: u.id, label: u.name }))
       )
     }
-  }, [selectedBuilding, allUnits])
+  }, [selectedBuilding, allUnits, currentUnit, isLoadingUnits, setValue])
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -193,94 +333,66 @@ export default function Form() {
     setSelectAll(false);
   };
 
-  async function searchProposal(id: string) {
-    setIsLoading(true)
-    const proposal = await getProposal(id)
-    setValue("proposalId", id)
-    if (!proposal) return;
-    const contactId = proposal.relations.find(item => item.id === "67fd417a21ba9077d3f1c0d4")?.relation.find(item => item.key !== "custom_objects.proposals")?.value as string
-    const spouseId = proposal.relations.find(item => item.id === "67fd5faa21ba903a1b02131e")?.relation.find(item => item.key !== "custom_objects.proposals")?.value as string
-    const developmentId = proposal.relations.find(item => item.id === "67fd413b8eba9e985167762a")?.relation.find(item => item.key !== "custom_objects.proposals")?.value as string
-    const unitId = proposal.relations.find(item => item.id === "67fd604421ba90b14302635f")?.relation.find(item => item.key !== "custom_objects.proposals")?.value as string
-    await searchContacts(contactId, spouseId)
-    await searchDevelopmentAndUnit(developmentId, unitId)
-    setIsLoading(false)
-    await updateProposalLabels(proposal)
+  function resetAllFields() {
+    setValue("proposalDate", "");
+    setValue("name", "");
+    setValue("cpf", "");
+    setValue("rg", "");
+    setValue("phone", "");
+    setValue("email", "");
+    setValue("nationality", "");
+    setValue("maritalStatus", "Solteiro(a)");
+    setValue("birthDate", "");
+    setValue("address", "");
+    setValue("zipCode", "");
+    setValue("neighborhood", "");
+    setValue("city", "");
+    setValue("state", "");
+    setValue("occupation", "");
+    
+    setValue("spouseName", "");
+    setValue("spouseCpf", "");
+    setValue("spouseRg", "");
+    setValue("spouseNationality", "");
+    setValue("spouseOccupation", "");
+    setValue("spouseEmail", "");
+    setValue("spousePhone", "");
+    setValue("spouseMaritalStatus", "Solteiro(a)");
+    setValue("spouseAddress", "");
+    setValue("spouseZipCode", "");
+    setValue("spouseNeighborhood", "");
+    setValue("spouseCity", "");
+    setValue("spouseState", "");
+    
+    setValue("building", "Serena By Mivita");
+    setValue("apartmentUnity", "");
+    setValue("floor", "");
+    setValue("tower", "");
+    setValue("vendor", "");
+    setValue("reservedUntill", "");
+    setValue("observations", "");
+    setValue("installments", []);
+    
+    setValue("opportunityName", "");
+    setValue("mainContactId", "");
+    setValue("spouseContactId", "");
+    setValue("proposalId", "");
   }
 
-  async function searchOpportunity() {
+  const searchOpportunity = async () => {
     setIsLoading(true)
+    resetAllFields()
     const opportunity = await getOpportunities(watch('opportunityId'))
-    if (!opportunity) return;
+    if (!opportunity) {
+      setIsLoading(false)
+      return;
+    }
     const contactId = opportunity.contactId
     const spouseId = opportunity.relations.find(item => item.recordId !== opportunity.contactId)?.recordId
-    await searchContacts(contactId, spouseId)
-    setIsLoading(false)
-    await updateProposalLabels(opportunity)
-  }
-
-  async function searchContacts(mainContactId: string, spouseContactId: string | undefined) {
-    const contact = await getContacts(mainContactId)
-    const spouse = spouseContactId ? await getContacts(spouseContactId) : null
-    await updateContactsLabels(contact, spouse)
-  }
-
-  async function searchDevelopmentAndUnit(developmentId: string, unitId: string) {
-    const development = await getDevelopment(developmentId)
-    const unit = await getUnit(unitId)
-    await updateDevelopmentLabels(development)
-    const newUnit: Unit = {
-      id: unit.id,
-      name: unit.properties.name,
-      development: development.properties.name
-    };
-    setCurrentUnit(newUnit)
-  }
-
-  function updateDevelopmentLabels(development: Proposal) {
-    setValue(
-      "building",
-      development.properties.name as
-      | "Serena By Mivita"
-      | "Lago By Mivita"
-      | "Stage Praia do Canto"
-      | "Next Jardim da Penha"
-      | "Inside Jardim da Penha"
-      | "Quartzo By Mivita"
-    );
-  }
-
-  function updateProposalLabels(param: Proposal | Opportunity): void {
-    if ('properties' in param) {
-      setValue("opportunityId", param.properties.opportunity_id);
-      setValue("opportunityName", param.properties.name);
-      setValue("proposalDate", param.properties.date);
-      setValue("vendor", param.properties.responsable);
-      setValue("reservedUntill", param.properties.reservation_date);
-      setValue("observations", param.properties.observations);
-      setValue("installments", checkPaymentFlow(param.properties.payment_flow))
-    } else {
-      setValue(
-        "building",
-        param.customFields?.find(item => item.id === 'EVdLCbbyeUrBrMIFmZVX')
-          ?.fieldValueArray[0] as
-        | "Serena By Mivita"
-        | "Lago By Mivita"
-        | "Stage Praia do Canto"
-        | "Next Jardim da Penha"
-        | "Inside Jardim da Penha"
-        | "Quartzo By Mivita"
-      );
-      setValue(
-        "vendor",
-        param.customFields.find(item => item.id === 'UxgoVhhSfTrIG9RFaUJ5')
-          ?.fieldValueString as string
-      );
-      setValue("opportunityName", param.name);
-    }
-  }
-
-  function updateContactsLabels(contact: Contact, spouse: Contact | null) {
+    
+    const contact = await getContacts(contactId)
+    const spouse = spouseId ? await getContacts(spouseId) : null
+    
     setValue("mainContactId", contact.id);
     setValue("name", `${contact.firstName} ${contact.lastName}`);
     setValue(
@@ -341,6 +453,45 @@ export default function Form() {
       setValue("spouseNeighborhood", spouse.customFields.find(item => item.id === 'BppzAoRqxsTWpdFcJwam')?.value as string);
       setValue("spouseState", spouse.state);
     }
+    
+    if ('properties' in opportunity && opportunity.properties) {
+      const props = opportunity.properties as {
+        opportunity_id: string;
+        name: string;
+        date: string;
+        responsable: string;
+        reservation_date: string;
+        observations: string;
+        payment_flow: string;
+      };
+      setValue("opportunityId", props.opportunity_id);
+      setValue("opportunityName", props.name);
+      setValue("proposalDate", props.date);
+      setValue("vendor", props.responsable);
+      setValue("reservedUntill", props.reservation_date);
+      setValue("observations", props.observations);
+      setValue("installments", checkPaymentFlow(props.payment_flow))
+    } else {
+      setValue(
+        "building",
+        opportunity.customFields?.find(item => item.id === 'EVdLCbbyeUrBrMIFmZVX')
+          ?.fieldValueArray[0] as
+        | "Serena By Mivita"
+        | "Lago By Mivita"
+        | "Stage Praia do Canto"
+        | "Next Jardim da Penha"
+        | "Inside Jardim da Penha"
+        | "Quartzo By Mivita"
+      );
+      setValue(
+        "vendor",
+        opportunity.customFields.find(item => item.id === 'UxgoVhhSfTrIG9RFaUJ5')
+          ?.fieldValueString as string
+      );
+      setValue("opportunityName", opportunity.name);
+    }
+    
+    setIsLoading(false)
   }
 
   return (
@@ -470,7 +621,7 @@ export default function Form() {
                       id='cpf'
                       type='text'
                       value={watch('cpf') || ''}
-                      onChange={(e) => setValue('cpf', formatCpfInput(e.target.value))}
+                      onChange={(e) => setValue('cpf', formatCpfInput(e.target.value.trim()))}
                       className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
                        focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
                        placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
@@ -834,7 +985,7 @@ export default function Form() {
                       id='spouseCpf'
                       type='text'
                       value={watch('spouseCpf') || ''}
-                      onChange={(e) => setValue('spouseCpf', formatCpfInput(e.target.value))}
+                      onChange={(e) => setValue('spouseCpf', formatCpfInput(e.target.value.trim()))}
                       className='px-3 w-full rounded-md border-0 py-1.5 bg-gray-0 text-gray-900 shadow-sm ring-1
                    focus:bg-white focus:ring-1 !focus:ring-gray-100 !outline-none ring-inset ring-gray-100 
                    placeholder:text-gray-200 font-medium sm:text-sm sm:leading-6'
